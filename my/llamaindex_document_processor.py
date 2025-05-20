@@ -1,8 +1,6 @@
 """
 LlamaIndex文档处理器示例
-
-本模块演示如何使用LlamaIndex处理需求文档，包括：
-1. 加载文档
+本模块演示如何使用LlamaIndex处理需求文档，包括：1. 加载文档
 2. 文档分块处理
 3. 创建向量索引
 4. 查询文档内容
@@ -97,28 +95,58 @@ class LlamaIndexDocumentProcessor:
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.persist_dir = persist_dir
-
+        self.embedding_model_name = embedding_model_name
+        self.embedding_model_type = embedding_model_type
+        self.use_deepseek_llm = use_deepseek_llm
+        self.deepseek_api_key = deepseek_api_key
+        self.deepseek_api_base = deepseek_api_base
+        
         # 设置嵌入模型
-        if embedding_model_type == "huggingface" and embedding_model_name:
-            try:
-                self.embed_model = HuggingFaceEmbedding(model_name=embedding_model_name)
-                Settings.embed_model = self.embed_model
-                print(f"使用HuggingFace嵌入模型: {embedding_model_name}")
-            except Exception as e:
-                print(f"加载HuggingFace嵌入模型失败: {str(e)}")
-        else:
-            print("未配置嵌入模型或所需库不可用，将使用默认嵌入模型")
-
+        self._setup_embedding_model()
+        
         # 设置LLM模型
-        if use_deepseek_llm:
+        self._setup_llm()
+        
+    def _setup_embedding_model(self):
+        """设置嵌入模型"""
+        if self.embedding_model_type == "huggingface":
+            # 使用HuggingFace嵌入模型
+            print(f"使用HuggingFace嵌入模型: {self.embedding_model_name}")
+            embed_model = HuggingFaceEmbedding(
+                model_name=self.embedding_model_name
+            )
+        elif self.embedding_model_type == "openai":
+            # 使用OpenAI嵌入模型
+            print(f"使用OpenAI嵌入模型: {self.embedding_model_name}")
+            embed_model = OpenAIEmbedding(
+                model=self.embedding_model_name,
+                api_key=self.deepseek_api_key,
+                api_base=self.deepseek_api_base
+            )
+        else:
+            raise ValueError(f"不支持的嵌入模型类型: {self.embedding_model_type}")
+            
+        # 设置全局嵌入模型
+        Settings.embed_model = embed_model
+        
+    def _setup_llm(self):
+        """设置LLM模型"""
+        if self.use_deepseek_llm:
+            # 使用DeepSeek LLM
+            print("使用DeepSeek LLM")
+            llm = OpenAI(
+                model="deepseek-chat",
+                api_key=self.deepseek_api_key,
+                api_base=self.deepseek_api_base
+            )
+        else:
+            # 使用默认LLM
+            print("使用默认LLM")
+            llm = None
+            
+        # 设置全局LLM
+        if llm is not None:
             try:
-                # 配置DeepSeek LLM
-                llm = OpenAI(
-                    model="deepseek-chat",
-                    api_key=deepseek_api_key,
-                    api_base=deepseek_api_base,
-                    temperature=0.1
-                )
                 Settings.llm = llm
                 print(f"使用DeepSeek LLM模型: deepseek-chat")
             except Exception as e:
@@ -135,21 +163,21 @@ class LlamaIndexDocumentProcessor:
         """
         加载文档
 
+
+        支持多种文档格式，包括PDF、DOCX、TXT等
+
+        
         支持多种文档格式，包括PDF、DOCX、TXT等
 
         Args:
             file_path: 文档路径
-
+            
         Returns:
-            Document对象列表
+            文档列表
         """
-        print(f"开始加载文档: {file_path}")
-
-        # 检查文件是否存在
-        if not Path(file_path).exists():
-            raise FileNotFoundError(f"文件不存在: {file_path}")
-
-        # 根据文件类型选择不同的处理方法
+        print(f"加载文档: {file_path}")
+        
+        # 根据文件类型选择不同的处理方式
         if file_path.endswith(('.pdf', '.docx')):
             # 使用Docling处理PDF或DOCX文件
             print(f"使用Docling处理{'PDF' if file_path.endswith('.pdf') else 'Word'}文档")
@@ -207,30 +235,20 @@ class LlamaIndexDocumentProcessor:
             splitter = HierarchicalNodeParser.from_defaults()
         else:
             raise ValueError(f"不支持的分块方法: {chunk_method}")
-
-        # 对文档进行分块
+            
+        # 分块处理
         nodes = splitter.get_nodes_from_documents(documents)
-        print(f"文档分块完成，共生成 {len(nodes)} 个文本块")
-
-        # 打印每个节点的内容
-        for i, node in enumerate(nodes):
-            print(f"\n-------- 文本块 {i+1}/{len(nodes)} --------")
-            print(f"文本长度: {len(node.text)} 字符")
-            if hasattr(node, 'metadata') and node.metadata:
-                print(f"元数据: {node.metadata}")
-            print(f"内容:\n{node.text}")
-            print("-" * 50)
-
+        print(f"生成了 {len(nodes)} 个文本块")
+        
         return nodes
 
-    def create_index(self, nodes: List[Document], persist: bool = True) -> VectorStoreIndex:
+    def create_index(self, nodes: List[Document]) -> VectorStoreIndex:
         """
         创建向量索引
-
+        
         Args:
-            nodes: 文档节点列表
-            persist: 是否持久化索引
-
+            nodes: 文档节点
+            
         Returns:
             向量索引对象
         """
@@ -240,13 +258,9 @@ class LlamaIndexDocumentProcessor:
         index = VectorStoreIndex(nodes, show_progress=True)
 
         # 持久化索引
-        if persist:
-            # 确保目录存在
-            os.makedirs(self.persist_dir, exist_ok=True)
-
-            # 持久化索引
-            index.storage_context.persist(persist_dir=self.persist_dir)
-            print(f"索引已持久化到: {self.persist_dir}")
+        os.makedirs(self.persist_dir, exist_ok=True)
+        index.storage_context.persist(persist_dir=self.persist_dir)
+        print(f"索引已持久化到 {self.persist_dir}")
 
         return index
 
@@ -262,7 +276,7 @@ class LlamaIndexDocumentProcessor:
             return None
 
         try:
-            print(f"从 {self.persist_dir} 加载索引...")
+            print(f"加载索引: {self.persist_dir}")
             storage_context = StorageContext.from_defaults(persist_dir=self.persist_dir)
             index = load_index_from_storage(storage_context)
             return index
@@ -407,4 +421,13 @@ if __name__ == "__main__":
     for i, node in enumerate(result["source_nodes"]):
         print(f"\n--- 文本块 {i+1} (相关度: {node['score']:.4f}) ---")
         print(node["text"] + "...")
+
+
+
+
+
+
+
+
+
 

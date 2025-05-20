@@ -127,7 +127,6 @@ class RequirementAnalysisAgent:
         - 需求结构化拆解与可测试性转化
         - 风险驱动的测试策略设计
         - 全链路需求追溯能力
-
         ## 2. 需求结构化框架
         ### 2.1 功能需求分解
         ```markdown
@@ -173,7 +172,6 @@ class RequirementAnalysisAgent:
         **核心流程**：
         - 100%功能覆盖
         - 80%代码覆盖率
-
         **边缘场景**：
         - 关键错误路径测试
         - 数据迁移验证
@@ -244,7 +242,7 @@ class RequirementAnalysisAgent:
             requirement_level:需求层级[BR]
             reviewer:[田老师]
             estimated_hours:[预计完成工时(整数类型)]
-            description:[需求描述] 作为一名<某类型的用户>，我希望<达成某些目的>，这样可以<开发的价值>。\n 验收标准：[明确的验收标准]
+            description:[需求描述] 作为一个<某类型的用户>，我希望<达成某些目的>，这样可以<开发的价值>。\n 验收标准：[明确的验收标准]
             acceptance_criteria:[验收标准]
             """,
             model_client_stream=False,
@@ -265,3 +263,4 @@ class RequirementAnalysisAgent:
                                     requirement_into_db_agent],
                                    termination_condition=source_termination)
         return team
+

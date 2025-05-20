@@ -1,13 +1,8 @@
 """
 文档分块策略示例
 
-本模块演示不同的文档分块策略，以及它们如何影响需求文档的处理效果。
-包括以下分块策略：
-1. 基于句子的分块
-2. 基于Token的分块
-3. 滑动窗口分块
-4. 层次化分块
-5. 语义分块
+本模块演示不同的文档分块策略，以及它们如何影响需求文档的处理效果。包括以下分块策略：1. 基于句子的分块 2. 基于Token的分块 3. 滑动窗口分块
+4. 层次化分块 5. 语义分块
 
 使用方法:
 ```python
@@ -130,15 +125,11 @@ class DocumentChunkingDemo:
         加载文档
 
         Returns:
-            Document对象列表
+            文档列表
         """
         print(f"加载文档: {self.file_path}")
 
-        # 检查文件是否存在
-        if not Path(self.file_path).exists():
-            raise FileNotFoundError(f"文件不存在: {self.file_path}")
-
-        # 根据文件类型选择不同的处理方法
+        # 根据文件类型选择不同的处理方式
         if self.file_path.endswith(('.pdf', '.docx')):
             # 使用Docling处理PDF或DOCX文件
             print(f"使用Docling处理{'PDF' if self.file_path.endswith('.pdf') else 'Word'}文档")
@@ -166,7 +157,7 @@ class DocumentChunkingDemo:
         Returns:
             分块后的文档节点
         """
-        print(f"使用句子分块器 (chunk_size={chunk_size}, chunk_overlap={chunk_overlap})")
+        print(f"使用句子分块器(chunk_size={chunk_size}, chunk_overlap={chunk_overlap})")
 
         splitter = SentenceSplitter(
             chunk_size=chunk_size,
@@ -204,14 +195,13 @@ class DocumentChunkingDemo:
     def chunk_with_window_splitter(self, window_size: int = 5) -> List[Document]:
         """
         使用滑动窗口分块器
-
         Args:
             window_size: 窗口大小
 
         Returns:
             分块后的文档节点
         """
-        print(f"使用滑动窗口分块器 (window_size={window_size})")
+        print(f"使用滑动窗口分块器(window_size={window_size})")
 
         splitter = SentenceWindowNodeParser.from_defaults(
             window_size=window_size,
@@ -334,7 +324,7 @@ class DocumentChunkingDemo:
 
         # 添加各策略的回答
         for strategy, result in results.items():
-            prompt += f"\n## {strategy} 策略的回答:\n{result['response']}\n"
+            prompt += f"\n## {strategy} 策略的回答\n{result['response']}\n"
 
         # 添加分析要求
         prompt += """
@@ -403,3 +393,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+

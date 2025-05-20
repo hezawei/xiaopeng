@@ -81,7 +81,7 @@ async def main():
     docx_file = "c:/Users/SuperV/Desktop/ai_dev/my/AI接口测试系统建设方案.docx"  # 替换为实际的Word文档路径
     print("\n=== 处理Word文档 ===")
     docx_content = await get_document_content(docx_file)
-    print(f"\nWord文档内容预览 (前200字符):\n{docx_content}...\n")
+    print(f"\nWord文档内容预览 (前200字符):\n{docx_content[:200]}...\n")
     
     # 示例：处理PDF文档（如果有的话）
     # pdf_file = "example.pdf"  # 替换为实际的PDF文档路径
@@ -97,3 +97,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

@@ -14,10 +14,11 @@ async def main():
     team = await agent.create_team()
 
     # 运行需求分析并输出结果
-    print(f"开始分析需求文档: {args.file}")
+    print(f"开始分析需求文件: {args.file}")
     await Console(team.run_stream(task="开始需求分析"))
     print("需求分析完成")
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 

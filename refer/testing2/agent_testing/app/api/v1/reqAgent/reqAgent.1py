@@ -1,0 +1,74 @@
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from autogen import AssistantAgent, UserProxyAgent
+from .llms import model_client
+import autogen
+import os
+
+app = FastAPI()
+
+# CORS配置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 文件存储目录
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# 初始化Autogen
+
+# assistant = AssistantAgent("assistant", model_client=model_client)
+assistant = autogen.AssistantAgent(
+        name="assistant",
+        model_client=model_client,
+        system_message="你是一个高级需求分析师."
+    )
+user_proxy = autogen.UserProxyAgent(
+        name="user_proxy",
+        human_input_mode="NEVER",
+        max_consecutive_auto_reply=10,
+    )
+# user_proxy = UserProxyAgent("user_proxy", code_execution_config={"work_dir": "coding"})
+
+
+@app.post("/chat/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        with open(file_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+        return {"filename": file.filename, "path": file_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat")
+async def chat_endpoint(data: dict):
+    try:
+        message = data.get("message", "")
+        file_path = data.get("file_path")
+
+        # 处理文件逻辑（根据需求实现）
+        if file_path:
+            with open(os.path.join(UPLOAD_DIR, file_path), "r") as f:
+                file_content = f.read()
+            message += f"\n[附件内容]: {file_content}"
+
+        # 使用Autogen生成回复
+        user_proxy.initiate_chat(assistant, message=message)
+        last_message = assistant.last_message()
+
+        return {"reply": last_message["content"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# if __name__ == "__main__":
+#     import uvicorn
+#
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
