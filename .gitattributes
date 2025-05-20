@@ -1,0 +1,23 @@
+# 自动识别文本文件并统一使用LF
+* text=auto eol=lf
+
+# 强制特定类型文件使用LF
+*.py text eol=lf
+*.sh text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+# 二进制文件（不进行转换）
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
+*.exe binary
+*.dll binary
+*.so binary
+
+# 明确忽略虚拟环境目录（虽然已在.gitignore中设置，但在此重复可增强效果）
+myenv/** -text

@@ -1,0 +1,14 @@
+# 忽略虚拟环境（适用于多种命名情况）
+myenv/
+venv/
+env/
+.venv/
+**/__pycache__/  # 忽略Python编译文件
+
+# 其他常见忽略项
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
