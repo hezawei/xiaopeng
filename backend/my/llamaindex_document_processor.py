@@ -38,11 +38,10 @@ from docling.document_converter import DocumentConverter
 
 # 嵌入模型相关导入
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-
+# 使用旧版本的导入路径
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 # LLM模型相关导入
-
 from llama_index.llms.openai import OpenAI
 from llama_index.llms.openai.utils import ALL_AVAILABLE_MODELS, CHAT_MODELS
 
@@ -421,6 +420,11 @@ if __name__ == "__main__":
     for i, node in enumerate(result["source_nodes"]):
         print(f"\n--- 文本块 {i+1} (相关度: {node['score']:.4f}) ---")
         print(node["text"] + "...")
+
+
+
+
+
 
 
 

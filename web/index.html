@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能车联AI接口测试系统 - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        /* 霸气简约风格配色 */
+        :root {
+            --primary-color: #1a1a1a; /* 主色-深黑 */
+            --primary-light: #2c2c2c;
+            --primary-dark: #000000;
+            --secondary-color: #f0f0f0;
+            --accent-color: #e63946; /* 强调色-红色 */
+            --text-color: #333333;
+            --text-light: #666666;
+            --success-color: #2a9d8f;
+            --warning-color: #e9c46a;
+            --danger-color: #e63946;
+            --white: #ffffff;
+            --light-bg: #f0f0f0;
+        }
+        /* 导航栏样式 */
+        .sidebar {
+            width: 220px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0;
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin: 0;
+            padding: 25px 15px;
+            font-size: 1.3rem;
+            line-height: 1.4;
+            background-color: var(--primary-dark);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+            margin-top: 20px;
+        }
+        .sidebar li {
+            padding: 14px 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            font-weight: 500;
+        }
+        .sidebar li:hover {
+            background-color: var(--primary-light);
+        }
+        .sidebar li.active {
+            background-color: var(--primary-light);
+        }
+        .sidebar li.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--accent-color);
+        }
+        /* 主内容区域样式 */
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background-color: var(--light-bg);
+        }
+        .header {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 35px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        .section {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+        }
+        .section h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .section h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--secondary-color);
+        }
+        .upload-area:hover {
+            border-color: var(--accent-color);
+        }
+        .upload-area p {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        .upload-area i {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            display: block;
+        }
+        .file-list {
+            margin-top: 25px;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .file-name {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        .btn {
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        .btn:hover {
+            background-color: var(--primary-light);
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        .btn-danger:hover {
+            background-color: #d62836;
+        }
+        .btn-accent {
+            background-color: var(--accent-color);
+        }
+        .btn-accent:hover {
+            background-color: #d62836;
+        }
+        /* 表格样式 */
+        .table-container {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white);
+            table-layout: fixed;
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            background-color: var(--white);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        select.form-control {
+            height: 35px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 10px;
+            padding-right: 25px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        /* 加载动画 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        .loading-spinner {
+            border: 3px solid #ddd;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* 页面内容 */
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 4px;
+            width: 550px;
+            max-width: 90%;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-header h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+        .modal-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: var(--accent-color);
+        }
+        .modal-body {
+            margin-bottom: 25px;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            resize: vertical;
+            min-height: 120px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        /* 分析结果 */
+        .analysis-result {
+            margin-top: 25px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: var(--white);
+            display: none;
+        }
+        .analysis-result h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .endpoint-list {
+            margin-top: 20px;
+        }
+        .endpoint-item {
+            padding: 15px;
+            background-color: var(--secondary-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--accent-color);
+            transition: all 0.2s;
+        }
+        .endpoint-item h4 {
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+        .endpoint-item p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <h2>智能车联AI接口测试系统</h2>
+        <ul>
+            <li class="active" data-page="requirement-analysis">需求分析</li>
+            <li data-page="testcase-generation">用例生成</li>
+        </ul>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 需求分析页面 -->
+        <div id="requirement-analysis" class="page active">
+            <div class="header">
+                <h1>需求分析</h1>
+            </div>
+            <div class="section">
+                <h2>上传测试文档</h2>
+                <div class="upload-area" id="uploadArea">
+                    <i>↑</i>
+                    <p>点击或拖拽文件到此处上传</p>
+                    <p>支持：需求文档、接口文档、测试用例(xmind格式)、图片等</p>
+                </div>
+                <div class="file-list" id="fileList">
+                    <!-- 文件列表将通过JavaScript动态添加 -->
+                </div>
+                <div class="form-group">
+                    <label for="requirement-description">需求描述</label>
+                    <textarea id="requirement-description" class="form-control" placeholder="请输入需求描述或补充说明..."></textarea>
+                </div>
+                <button class="btn btn-accent" id="analyze-btn">开始需求分析</button>
+
+                <!-- 加载动画 -->
+                <div class="loading" id="analysis-loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在分析需求，请稍候...</p>
+                </div>
+
+                <!-- 分析结果 -->
+                <div class="analysis-result" id="analysis-result">
+                    <h3 id="analysis-title">智能驾驶系统API</h3>
+                    <p id="analysis-description">提供智能驾驶相关功能，包括车辆状态监控、路径规划和自动驾驶控制，支持实时数据传输和高并发请求</p>
+                    <h4>识别到的接口端点:</h4>
+                    <div class="endpoint-list" id="endpoint-list">
+                        <!-- 接口端点将通过JavaScript动态添加 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用例生成页面 -->
+        <div id="testcase-generation" class="page">
+            <div class="header">
+                <h1>用例生成</h1>
+            </div>
+            <div class="section">
+                <h2>上传测试文档</h2>
+                <div class="upload-area" id="uploadAreaTestcase">
+                    <i>↑</i>
+                    <p>点击或拖拽文件到此处上传</p>
+                    <p>支持：需求文档、接口文档、测试用例(xmind格式)、图片等</p>
+                </div>
+                <div class="file-list" id="fileListTestcase">
+                    <!-- 文件列表将通过JavaScript动态添加 -->
+                </div>
+                <div class="form-group">
+                    <label for="testcase-description">需求描述</label>
+                    <textarea id="testcase-description" class="form-control" placeholder="请输入需求描述或补充说明..."></textarea>
+                </div>
+                <button class="btn btn-accent" id="generate-btn">生成测试用例</button>
+
+                <!-- 加载动画 -->
+                <div class="loading" id="generation-loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在生成测试用例，请稍候...</p>
+                </div>
+
+                <!-- 生成的测试用例 -->
+                <div class="table-container" id="testcases-result" style="display: none;">
+                    <h3>生成的测试用例</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>用例ID</th>
+                                <th>用例名称</th>
+                                <th>接口</th>
+                                <th>前置条件</th>
+                                <th>测试步骤</th>
+                                <th>预期结果</th>
+                                <th>优先级</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testcase-tbody">
+                            <!-- 测试用例将通过JavaScript动态添加 -->
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button class="btn btn-accent" id="feedback-btn">提供反馈</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 反馈模态框 -->
+    <div class="modal" id="feedback-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>测试用例反馈</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: var(--text-color);">请对生成的测试用例进行反馈：</p>
+                <div class="form-group" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px;">
+                    <div style="margin-bottom: 12px;">
+                        <input type="radio" id="agree-option" name="feedback-option" value="agree" style="margin-right: 8px; transform: scale(1.2);">
+                        <label for="agree-option" style="display: inline; font-weight: 500; color: var(--text-color);">同意生成的测试用例</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="modify-option" name="feedback-option" value="modify" style="margin-right: 8px; transform: scale(1.2);">
+                        <label for="modify-option" style="display: inline; font-weight: 500; color: var(--text-color);">需要修改</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="feedback-text">修改建议</label>
+                    <textarea id="feedback-text" placeholder="请输入您的修改建议..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancel-feedback-btn">取消</button>
+                <button class="btn btn-accent" id="submit-feedback-btn">提交反馈</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 页面切换功能
+            const menuItems = document.querySelectorAll('.sidebar li');
+            const pages = document.querySelectorAll('.page');
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 更新菜单项状态
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // 显示对应页面
+                    const pageId = this.getAttribute('data-page');
+                    pages.forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById(pageId).classList.add('active');
+                });
+            });
+
+            // 文件上传模拟 - 需求分析页面
+            const uploadArea = document.getElementById('uploadArea');
+            const fileList = document.getElementById('fileList');
+            let fileId = 1;
+
+            uploadArea.addEventListener('click', function() {
+                // 模拟文件选择
+                const fileName = prompt('请输入文件名 (模拟上传):', '需求文档.docx');
+                if (fileName) {
+                    addFile(fileName, fileList, fileId++);
+                }
+            });
+
+            // 文件上传模拟 - 用例生成页面
+            const uploadAreaTestcase = document.getElementById('uploadAreaTestcase');
+            const fileListTestcase = document.getElementById('fileListTestcase');
+            let fileIdTestcase = 1;
+
+            uploadAreaTestcase.addEventListener('click', function() {
+                // 模拟文件选择
+                const fileName = prompt('请输入文件名 (模拟上传):', '接口文档.docx');
+                if (fileName) {
+                    addFile(fileName, fileListTestcase, fileIdTestcase++);
+                }
+            });
+
+            // 添加文件到列表
+            function addFile(fileName, listElement, id) {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.id = `file-${id}`;
+
+                fileItem.innerHTML = `
+                    <span class="file-name">${fileName}</span>
+                    <button class="btn btn-danger" data-id="${id}">删除</button>
+                `;
+
+                listElement.appendChild(fileItem);
+
+                // 添加删除按钮事件
+                const deleteBtn = fileItem.querySelector('.btn-danger');
+                deleteBtn.addEventListener('click', function() {
+                    const fileId = this.getAttribute('data-id');
+                    const fileToRemove = document.getElementById(`file-${fileId}`);
+                    if (fileToRemove) {
+                        fileToRemove.remove();
+                    }
+                });
+            }
+
+            // 需求分析功能
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const analysisLoading = document.getElementById('analysis-loading');
+            const analysisResult = document.getElementById('analysis-result');
+            const endpointList = document.getElementById('endpoint-list');
+
+            analyzeBtn.addEventListener('click', function() {
+                // 检查是否有上传文件或输入描述
+                const requirementDesc = document.getElementById('requirement-description').value;
+                if (fileList.children.length === 0 && !requirementDesc.trim()) {
+                    alert('请上传文件或输入需求描述');
+                    return;
+                }
+
+                // 显示加载动画
+                analysisLoading.style.display = 'block';
+                this.disabled = true;
+
+                // 模拟API调用延迟
+                setTimeout(() => {
+                    // 隐藏加载动画，显示结果
+                    analysisLoading.style.display = 'none';
+                    analysisResult.style.display = 'block';
+                    this.disabled = false;
+
+                    // 清空之前的端点列表
+                    endpointList.innerHTML = '';
+
+                    // 添加模拟的接口端点
+                    const endpoints = [
+                        { method: 'GET', path: '/api/vehicle/status', desc: '获取车辆实时状态信息' },
+                        { method: 'POST', path: '/api/navigation/plan', desc: '规划导航路径' },
+                        { method: 'PUT', path: '/api/driving/control', desc: '发送自动驾驶控制指令' },
+                        { method: 'GET', path: '/api/environment/perception', desc: '获取环境感知数据' }
+                    ];
+
+                    endpoints.forEach(endpoint => {
+                        const endpointItem = document.createElement('div');
+                        endpointItem.className = 'endpoint-item';
+                        endpointItem.innerHTML = `
+                            <h4>${endpoint.method} ${endpoint.path}</h4>
+                            <p>${endpoint.desc}</p>
+                        `;
+                        endpointList.appendChild(endpointItem);
+                    });
+                }, 2000);
+            });
+
+            // 用例生成功能
+            const generateBtn = document.getElementById('generate-btn');
+            const generationLoading = document.getElementById('generation-loading');
+            const testcasesResult = document.getElementById('testcases-result');
+            const testcaseTbody = document.getElementById('testcase-tbody');
+            const feedbackBtn = document.getElementById('feedback-btn');
+            const feedbackModal = document.getElementById('feedback-modal');
+
+            generateBtn.addEventListener('click', function() {
+                // 检查是否有上传文件或输入描述
+                const testcaseDesc = document.getElementById('testcase-description').value;
+                if (fileListTestcase.children.length === 0 && !testcaseDesc.trim()) {
+                    alert('请上传文件或输入需求描述');
+                    return;
+                }
+
+                // 显示加载动画
+                generationLoading.style.display = 'block';
+                this.disabled = true;
+
+                // 模拟API调用延迟
+                setTimeout(() => {
+                    // 隐藏加载动画，显示结果
+                    generationLoading.style.display = 'none';
+                    testcasesResult.style.display = 'block';
+                    this.disabled = false;
+
+                    // 清空之前的测试用例
+                    testcaseTbody.innerHTML = '';
+
+                    // 添加模拟的测试用例
+                    const testcases = [
+                        {
+                            id: 'TC001',
+                            name: '获取车辆正常状态信息',
+                            api: 'GET /api/vehicle/status',
+                            precondition: '车辆在线且系统正常运行',
+                            steps: '1. 调用状态API<br>2. 传入有效的车辆ID',
+                            expected: '返回车辆状态信息，状态码200',
+                            priority: '高'
+                        },
+                        {
+                            id: 'TC002',
+                            name: '获取不存在车辆的状态',
+                            api: 'GET /api/vehicle/status',
+                            precondition: '系统中不存在该车辆ID',
+                            steps: '1. 调用状态API<br>2. 传入不存在的车辆ID',
+                            expected: '返回错误信息，状态码404',
+                            priority: '中'
+                        },
+                        {
+                            id: 'TC003',
+                            name: '规划有效导航路径',
+                            api: 'POST /api/navigation/plan',
+                            precondition: '系统中存在有效的地图数据',
+                            steps: '1. 调用规划API<br>2. 传入有效的起点和终点坐标',
+                            expected: '返回规划路径信息，状态码200',
+                            priority: '高'
+                        }
+                    ];
+
+                    testcases.forEach(testcase => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${testcase.id}</td>
+                            <td>${testcase.name}</td>
+                            <td>${testcase.api}</td>
+                            <td>${testcase.precondition}</td>
+                            <td>${testcase.steps}</td>
+                            <td>${testcase.expected}</td>
+                            <td>${testcase.priority}</td>
+                        `;
+                        testcaseTbody.appendChild(row);
+                    });
+                }, 2000);
+            });
+
+            // 反馈模态框
+            feedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'flex';
+            });
+
+            // 关闭模态框
+            const closeButtons = document.querySelectorAll('.modal-close');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+
+            // 取消反馈
+            const cancelFeedbackBtn = document.getElementById('cancel-feedback-btn');
+            cancelFeedbackBtn.addEventListener('click', function() {
+                feedbackModal.style.display = 'none';
+            });
+
+            // 提交反馈
+            const submitFeedbackBtn = document.getElementById('submit-feedback-btn');
+            submitFeedbackBtn.addEventListener('click', function() {
+                const feedbackText = document.getElementById('feedback-text').value;
+                const feedbackOptions = document.getElementsByName('feedback-option');
+                let selectedOption = '';
+
+                for (const option of feedbackOptions) {
+                    if (option.checked) {
+                        selectedOption = option.value;
+                        break;
+                    }
+                }
+
+                feedbackModal.style.display = 'none';
+
+                if (selectedOption === 'agree' || !selectedOption) {
+                    alert('感谢您的反馈！测试用例已确认。');
+                } else if (selectedOption === 'modify' && feedbackText) {
+                    alert('已收到您的修改建议，我们将根据您的反馈优化测试用例。');
+
+                    // 模拟根据反馈修改测试用例
+                    setTimeout(() => {
+                        alert('测试用例已根据您的反馈进行更新。');
+
+                        // 添加一个新的测试用例，模拟更新
+                        const newTestcase = {
+                            id: 'TC004',
+                            name: '无效坐标参数测试',
+                            api: 'POST /api/navigation/plan',
+                            precondition: '无',
+                            steps: '1. 调用规划API<br>2. 传入无效的坐标参数（超出地图范围）',
+                            expected: '返回参数错误信息，状态码400',
+                            priority: '高'
+                        };
+
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${newTestcase.id}</td>
+                            <td>${newTestcase.name}</td>
+                            <td>${newTestcase.api}</td>
+                            <td>${newTestcase.precondition}</td>
+                            <td>${newTestcase.steps}</td>
+                            <td>${newTestcase.expected}</td>
+                            <td>${newTestcase.priority}</td>
+                        `;
+                        testcaseTbody.appendChild(row);
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

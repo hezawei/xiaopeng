@@ -2,6 +2,8 @@ autogen-agentchat==0.4.9.2
 autogen-core==0.4.9.2
 autogen-ext[openai]==0.4.9.2
 pydantic~=2.10.6
-llama-index-core~=0.12.22
+llama-index>=0.12.22
 python-dotenv==1.0.1
 openai~=1.65.4
+docling~=2.25.2
+
