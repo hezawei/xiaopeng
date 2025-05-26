@@ -4,9 +4,9 @@
     <div class="sidebar">
       <h2>智能车联AI接口测试系统</h2>
       <ul>
-        <li 
-          v-for="(item, index) in menuItems" 
-          :key="index" 
+        <li
+          v-for="(item, index) in menuItems"
+          :key="index"
           :class="{ active: activeMenu === item.id }"
           @click="setActiveMenu(item.id)"
         >
@@ -24,8 +24,8 @@
         </div>
         <div class="section">
           <h2>上传测试文档</h2>
-          <div 
-            class="upload-area" 
+          <div
+            class="upload-area"
             @click="triggerFileUpload"
             @dragover.prevent
             @drop.prevent="handleFileDrop"
@@ -33,10 +33,10 @@
             <i>↑</i>
             <p>点击或拖拽文件到此处上传</p>
             <p>支持：需求文档、接口文档、测试用例(xmind格式)、图片等</p>
-            <input 
-              type="file" 
-              ref="fileInput" 
-              style="display: none" 
+            <input
+              type="file"
+              ref="fileInput"
+              style="display: none"
               multiple
               @change="handleFileChange"
             >
@@ -49,15 +49,15 @@
           </div>
           <div class="form-group">
             <label for="requirement-description">需求描述</label>
-            <textarea 
-              id="requirement-description" 
-              class="form-control" 
+            <textarea
+              id="requirement-description"
+              class="form-control"
               placeholder="请输入需求描述或补充说明..."
               v-model="requirementDescription"
             ></textarea>
           </div>
-          <button 
-            class="btn btn-accent" 
+          <button
+            class="btn btn-accent"
             @click="startAnalysis"
             :disabled="isAnalyzing || uploadedFiles.length === 0"
           >
@@ -113,6 +113,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios'
 
 // 菜单项
 const menuItems = [
@@ -128,6 +129,7 @@ const uploadedFiles = ref([]);
 const requirementDescription = ref('');
 const isAnalyzing = ref(false);
 const analysisResult = ref(null);
+const analysisError = ref(null);
 const fileInput = ref(null);
 
 // 方法
@@ -163,30 +165,70 @@ const removeFile = (index) => {
 
 const startAnalysis = async () => {
   isAnalyzing.value = true;
-  
-  // 模拟API调用
+  analysisError.value = null;
+
   try {
-    // 这里应该是实际的API调用
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // 模拟返回结果
-    analysisResult.value = {
-      summary: "需求分析完成",
-      keyPoints: [
-        "识别到API接口测试需求",
-        "需要支持自动化测试用例生成",
-        "需要支持测试报告生成"
-      ],
-      recommendations: [
-        "建议使用RESTful API测试框架",
-        "建议集成CI/CD流程"
-      ]
-    };
+    const formData = new FormData();
+
+    // 添加文件到 FormData
+    uploadedFiles.value.forEach(file => {
+      formData.append('file', file);
+    });
+
+    // 添加描述和分块方法参数
+    formData.append('description', requirementDescription.value || '进行需求分析');
+    formData.append('chunk_method', 'sentence');
+
+    // 发送请求到后端
+    const response = await axios.post('/api/analyze', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    // 处理响应数据
+    if (response.data.code === 200) {
+      analysisResult.value = {
+        summary: response.data.data.summary,
+        keyPoints: extractKeyPoints(response.data.data.response),
+        recommendations: extractRecommendations(response.data.data.response)
+      };
+    } else {
+      throw new Error('API 返回异常');
+    }
+
   } catch (error) {
-    console.error("分析过程出错:", error);
+    analysisError.value = error.response?.data?.message || '分析失败';
+    console.error("分析错误:", error);
   } finally {
     isAnalyzing.value = false;
   }
+};
+
+// 提取关键点的辅助函数
+function extractKeyPoints(text) {
+  const points = [];
+  const pointRegex = /识别到(.*?)\./g;
+  let match;
+
+  while ((match = pointRegex.exec(text)) !== null) {
+    points.push(match[0]);
+  }
+
+  return points.length ? points : ['未识别到关键点'];
+}
+
+// 提取建议的辅助函数
+function extractRecommendations(text) {
+  const recommendations = [];
+  const recRegex = /建议(.*?)\./g;
+  let match;
+
+  while ((match = recRegex.exec(text)) !== null) {
+    recommendations.push(match[0]);
+  }
+
+  return recommendations.length ? recommendations : ['无建议'];
 };
 
 onMounted(() => {

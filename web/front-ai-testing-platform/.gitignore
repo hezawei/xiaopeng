@@ -23,7 +23,91 @@ coverage
 .idea
 *.suo
 *.ntvs*
-*.njsproj
+*.njsproj# 通用忽略规则
+*.py[cod]
+*.log
+*.sqlite
+*.swp
+*.swo
+*~
+.DS_Store
+.env
+.env.local
+.env.development
+.env.production
+
+# 开发环境目录
+venv/
+.venv/
+env/
+myenv/
+**/__pycache__/
+
+# 前端相关
+node_modules/
+dist/
+.cache/
+.temp/
+.eslintcache
+
+# 后端相关
+# 上传文件目录
+backend/my/uploads/
+# 向量索引存储
+backend/my/document_index/
+# 包目录
+*.egg-info/
+build/
+dist/
+
+# 编辑器/IDE配置
+.vscode/
+.idea/
+*.iml
+
+# 测试覆盖率
+.coverage
+htmlcov/
+.coverage.*
+
+# 文档生成
+docs/_build/
+
+# 前端项目特定忽略（Vite）
+front-ai-testing-platform/.env
+front-ai-testing-platform/.env.*
+front-ai-testing-platform/.vite/
+front-ai-testing-platform/dist/
+front-ai-testing-platform/package-lock.json
+
+# 调试文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 本地配置文件
+.local
+.typescript
+
+# 实验性文件
+*.experimental
+*.backup
+
+# 大文件
+*.zip
+*.tar.gz
+
+# 机器学习模型文件
+*.pkl
+*.h5
+*.pt
+*.onnx
+
+# 密钥文件
+*.pem
+*.key
+*.crt
+
 *.sln
 *.sw?
 
