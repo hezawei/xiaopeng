@@ -285,7 +285,7 @@ class LlamaIndexDocumentProcessor:
 
     def query_index(self, index: VectorStoreIndex, query: str, top_k: int = 5, language: str = "中文") -> Dict[str, Any]:
         """
-        查询索引，在官方提示词基础上添加语言指令
+        查询索引，在官方提示词基础上添加语言指令和格式化指令
     
         Args:
             index: 向量索引对象
@@ -314,11 +314,15 @@ class LlamaIndexDocumentProcessor:
         # 获取默认提示词模板的内容
         default_template = DEFAULT_TEXT_QA_PROMPT.template
         
-        # 在默认提示词基础上添加语言指令
-        # 在"answer the query"后添加语言指令
+        # 在默认提示词基础上添加语言指令和格式化指令
         modified_template = default_template.replace(
             "answer the query.",
-            f"answer the query. Please respond in {language}."
+            f"""answer the query. Please respond in {language}.
+            
+            Format your response with clear headings, bullet points for lists, and proper paragraph breaks.
+            Use markdown formatting to make the response more readable.
+            Organize information in a logical structure.
+            """
         )
         
         # 创建修改后的提示词模板
@@ -420,6 +424,7 @@ if __name__ == "__main__":
     for i, node in enumerate(result["source_nodes"]):
         print(f"\n--- 文本块 {i+1} (相关度: {node['score']:.4f}) ---")
         print(node["text"] + "...")
+
 
 
 
