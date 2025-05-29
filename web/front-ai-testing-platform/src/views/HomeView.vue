@@ -56,15 +56,6 @@
               v-model="requirementDescription"
             ></textarea>
           </div>
-<<<<<<< HEAD
-          <button
-            class="btn btn-accent"
-            @click="startAnalysis"
-            :disabled="isAnalyzing || uploadedFiles.length === 0"
-          >
-            开始需求分析
-          </button>
-=======
           <div class="form-group">
             <label for="analysis-query">分析问题</label>
             <input 
@@ -91,7 +82,6 @@
               WebSocket实时分析
             </button>
           </div>
->>>>>>> 5ad960a4e4c6c9b78b62cb6e591e362c56328500
 
           <!-- 加载动画 -->
           <div class="loading" v-if="isAnalyzing">
@@ -157,10 +147,6 @@
 </template>
 
 <script setup>
-<<<<<<< HEAD
-import { ref, onMounted } from 'vue';
-import axios from 'axios'
-=======
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 // 导入marked和DOMPurify库用于Markdown渲染和安全处理
@@ -179,7 +165,6 @@ const clientId = ref(uuidv4());
 let wsConnection = null;
 let messageTimeoutId = null;
 let hasRequestBeenSent = false; // 添加标志，防止重复发送请求
->>>>>>> 5ad960a4e4c6c9b78b62cb6e591e362c56328500
 
 // 菜单项
 const menuItems = [
@@ -198,11 +183,7 @@ const analysisQuery = ref('分析这个文档的主要需求和功能点');
 const isAnalyzing = ref(false);
 const loadingMessage = ref('正在分析需求，请稍候...');
 const analysisResult = ref(null);
-<<<<<<< HEAD
-const analysisError = ref(null);
-=======
 const processingLogs = ref([]);
->>>>>>> 5ad960a4e4c6c9b78b62cb6e591e362c56328500
 const fileInput = ref(null);
 
 // 添加服务器状态检测
@@ -296,45 +277,6 @@ const uploadFiles = async (files) => {
   }
 };
 
-<<<<<<< HEAD
-const startAnalysis = async () => {
-  isAnalyzing.value = true;
-  analysisError.value = null;
-
-  try {
-    const formData = new FormData();
-
-    // 添加文件到 FormData
-    uploadedFiles.value.forEach(file => {
-      formData.append('file', file);
-    });
-
-    // 添加描述和分块方法参数
-    formData.append('description', requirementDescription.value || '进行需求分析');
-    formData.append('chunk_method', 'sentence');
-
-    // 发送请求到后端
-    const response = await axios.post('/api/analyze', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-
-    // 处理响应数据
-    if (response.data.code === 200) {
-      analysisResult.value = {
-        summary: response.data.data.summary,
-        keyPoints: extractKeyPoints(response.data.data.response),
-        recommendations: extractRecommendations(response.data.data.response)
-      };
-    } else {
-      throw new Error('API 返回异常');
-    }
-
-  } catch (error) {
-    analysisError.value = error.response?.data?.message || '分析失败';
-    console.error("分析错误:", error);
-=======
 const removeFile = async (index) => {
   try {
     const fileId = uploadedFileIds.value[index];
@@ -451,38 +393,11 @@ const startAnalysisHttp = async () => {
   } catch (error) {
     console.error('分析过程出错:', error);
     addLog('error', `分析过程出错: ${error.message}`);
->>>>>>> 5ad960a4e4c6c9b78b62cb6e591e362c56328500
   } finally {
     isAnalyzing.value = false;
   }
 };
 
-<<<<<<< HEAD
-// 提取关键点的辅助函数
-function extractKeyPoints(text) {
-  const points = [];
-  const pointRegex = /识别到(.*?)\./g;
-  let match;
-
-  while ((match = pointRegex.exec(text)) !== null) {
-    points.push(match[0]);
-  }
-
-  return points.length ? points : ['未识别到关键点'];
-}
-
-// 提取建议的辅助函数
-function extractRecommendations(text) {
-  const recommendations = [];
-  const recRegex = /建议(.*?)\./g;
-  let match;
-
-  while ((match = recRegex.exec(text)) !== null) {
-    recommendations.push(match[0]);
-  }
-
-  return recommendations.length ? recommendations : ['无建议'];
-=======
 
 const startAnalysisWebSocket = () => {
   if (uploadedFileIds.value.length === 0) {
@@ -703,7 +618,6 @@ const handleResize = () => {
       processTablesAfterRender();
     }
   }, 200);
->>>>>>> 5ad960a4e4c6c9b78b62cb6e591e362c56328500
 };
 
 onMounted(() => {
