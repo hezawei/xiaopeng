@@ -60,12 +60,12 @@ class DocumentImageProcessor:
     
     def __init__(
         self,
-        api_keys: List[str],
+        api_keys: List[str] = None,
         api_base: str = "https://api.moonshot.cn/v1",
         multimodal_model: str = "moonshot-v1-32k-vision-preview",
-        max_concurrent_requests: int = 2,
+        max_concurrent_requests: int = 4,  # 默认设为4，与API key数量匹配
         temp_dir: str = "./temp_images",
-        min_api_interval: int = 5  # 同一API密钥最小调用间隔(秒)
+        min_api_interval: int = 0  # 移除强制等待间隔，改为动态处理
     ):
         """
         初始化文档图片处理器
@@ -78,10 +78,20 @@ class DocumentImageProcessor:
             temp_dir: 临时图片存储目录
             min_api_interval: 同一API密钥最小调用间隔(秒)
         """
-        self.api_keys = api_keys if isinstance(api_keys, list) else [api_keys]
+        # 使用新的API密钥列表（来自不同账号）
+        if api_keys is None:
+            self.api_keys = [
+                "sk-fCgBeG8ETu8MMCIaAmdOI4JpOKKagF7qXNIE4kIhu2q8zEU3",  # 替换为您的第一个API密钥
+                "sk-n9Kb2lFGyV3LJ0GEwg3NBjy5ZrJk3qTlNJJt4Kfkro7T8Fct",  # 替换为您的第二个API密钥
+                "sk-GwCmhwrrhicbkbishgUhYmVg6IrAJkg4mwWPNIMpdkQBe8tr",  # 替换为您的第三个API密钥
+                "sk-3vO3Ku08wFZBRREAWGxPWKYtEcUE8pZ1ResjWOa0RvBLz2aM",  # 替换为您的第四个API密钥
+            ]
+        else:
+            self.api_keys = api_keys if isinstance(api_keys, list) else [api_keys]
+            
         self.api_base = api_base
         self.multimodal_model = multimodal_model
-        self.max_concurrent_requests = max_concurrent_requests
+        self.max_concurrent_requests = min(max_concurrent_requests, len(self.api_keys))
         self.temp_image_dir = temp_dir
         self.min_api_interval = min_api_interval
         
@@ -95,13 +105,13 @@ class DocumentImageProcessor:
             print(f"初始化DocumentConverter失败: {str(e)}")
             self.doc_converter = None
         
-        # 创建信号量以限制并发请求
-        self.semaphore = asyncio.Semaphore(max_concurrent_requests)
+        # API密钥管理 - 使用锁和状态跟踪
+        self.api_key_locks = {key: asyncio.Lock() for key in self.api_keys}
+        self.api_key_last_used = {key: 0 for key in self.api_keys}
+        self.api_key_in_use = {key: False for key in self.api_keys}  # 跟踪密钥是否正在使用
         
-        # 记录每个API密钥的上次调用时间
-        self.last_api_call = {key: 0 for key in self.api_keys}
-        # 当前API密钥索引
-        self.current_api_key_index = 0
+        # 创建API密钥池信号量 - 限制总并发数
+        self.api_key_semaphore = asyncio.Semaphore(len(self.api_keys))
     
     def process_document(self, file_path: str) -> str:
         """
@@ -690,9 +700,6 @@ class DocumentImageProcessor:
         conversion_result = self.doc_converter.convert(file_path)
         document = conversion_result.document
         
-        # 打印文档结构，帮助调试
-        print(f"文档结构: {type(document)}")
-        
         # 提取图片，传入原始文件路径
         images_info = self._extract_images_from_document(document, original_file_path=file_path)
         print(f"提取到 {len(images_info)} 张图片")
@@ -701,36 +708,28 @@ class DocumentImageProcessor:
             print("警告: 未从文档中提取到任何图片，请检查文档格式或docling库的兼容性")
             return document.export_to_markdown()
         
-        # 2. 异步对每个图片生成描述
-        # 创建所有任务
-        tasks = []
-        for image_info in images_info:
-            image_path = image_info["image_path"]
-            print(f"创建图片描述任务: {image_path}")
-            
-            # 使用智能提示词让模型自行判断图片类型并给出相应描述
-            prompt = """请分析这张图片并提供详细描述。根据图片类型给出适当的描述:
-            
-            - 如果是流程图或架构图: 详细描述各个组件、流程步骤、数据流向和逻辑关系
-            - 如果是表格: 描述表格结构、列名和主要数据内容
-            - 如果是图表(如柱状图、饼图等): 解释图表表达的数据关系、趋势和关键数据点
-            - 如果是界面截图: 描述界面布局、功能区域和主要控件
-            - 如果是其他类型图片: 描述图片中的主要视觉元素和内容
-            
-            请确保描述全面、准确，覆盖图片中的所有重要信息，包括任何文本内容。"""
-            
-            # 创建异步任务
-            task = self._describe_image_with_model_async(image_path, prompt)
-            tasks.append((image_info, asyncio.create_task(task)))
+        # 2. 创建所有图片描述任务
+        prompt = """请分析这张图片并提供详细描述。根据图片类型给出适当的描述:
         
-        # 等待所有任务完成
-        for image_info, task in tasks:
-            try:
-                description = await task
-                image_info["description"] = description
-            except Exception as e:
-                print(f"描述图片失败: {str(e)}")
-                image_info["description"] = f"[图片描述生成失败: {str(e)}]"
+        - 如果是流程图或架构图: 详细描述各个组件、流程步骤、数据流向和逻辑关系
+        - 如果是表格: 描述表格结构、列名和主要数据内容
+        - 如果是图表(如柱状图、饼图等): 解释图表表达的数据关系、趋势和关键数据点
+        - 如果是界面截图: 描述界面布局、功能区域和主要控件
+        - 如果是其他类型图片: 描述图片中的主要视觉元素和内容
+        
+        请确保描述全面、准确，覆盖图片中的所有重要信息，包括任何文本内容。"""
+        
+        # 创建任务列表
+        tasks = []
+        for i, image_info in enumerate(images_info):
+            image_path = image_info["image_path"]
+            print(f"创建图片描述任务 {i+1}/{len(images_info)}: {image_path}")
+            task = self._process_single_image(image_info, image_path, prompt)
+            tasks.append(task)
+        
+        # 并发执行所有任务
+        print(f"开始并发处理 {len(tasks)} 个图片描述任务")
+        await asyncio.gather(*tasks)
         
         # 3. 生成包含图片描述的文本
         result_text = self._generate_text_with_descriptions(document, images_info)
@@ -738,81 +737,26 @@ class DocumentImageProcessor:
         print(f"文档处理完成，生成了包含{len(images_info)}个图片描述的文本")
         return result_text
 
-    async def process_document_to_word_async(self, file_path: str, output_path: str) -> str:
+    async def _process_single_image(self, image_info: Dict[str, Any], image_path: str, prompt: str) -> None:
         """
-        异步处理文档，提取图片并生成描述，输出新的Word文档
+        处理单个图片的描述任务
         
         Args:
-            file_path: 输入文档路径
-            output_path: 输出文档路径
-        
-        Returns:
-            输出文档路径
+            image_info: 图片信息字典，将被原地修改添加描述
+            image_path: 图片路径
+            prompt: 描述提示词
         """
-        print(f"开始异步处理文档: {file_path}")
-        
-        # 1. 转换文档并提取图片
-        conversion_result = self.doc_converter.convert(file_path)
-        document = conversion_result.document
-        
-        # 打印文档结构，帮助调试
-        print(f"文档结构: {type(document)}")
-        
-        # 提取图片，传入原始文件路径
-        images_info = self._extract_images_from_document(document, original_file_path=file_path)
-        print(f"提取到 {len(images_info)} 张图片")
-        
-        if len(images_info) == 0:
-            print("警告: 未从文档中提取到任何图片，请检查文档格式或docling库的兼容性")
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(document.export_to_markdown())
-            return output_path
-        
-        # 2. 异步对每个图片生成描述
-        # 创建信号量控制并发
-        semaphore = asyncio.Semaphore(2)  # 限制最多2个并发请求
-        
-        # 创建所有任务
-        tasks = []
-        for image_info in images_info:
-            image_path = image_info["image_path"]
-            print(f"创建图片描述任务: {image_path}")
-            
-            # 使用智能提示词让模型自行判断图片类型并给出相应描述
-            prompt = """请分析这张图片并提供详细描述。根据图片类型给出适当的描述:
-            
-            - 如果是流程图或架构图: 详细描述各个组件、流程步骤、数据流向和逻辑关系
-            - 如果是表格: 描述表格结构、列名和主要数据内容
-            - 如果是图表(如柱状图、饼图等): 解释图表表达的数据关系、趋势和关键数据点
-            - 如果是界面截图: 描述界面布局、功能区域和主要控件
-            - 如果是其他类型图片: 描述图片中的主要视觉元素和内容
-            
-            请确保描述全面、准确，覆盖图片中的所有重要信息，包括任何文本内容。"""
-            
-            # 创建异步任务
-            tasks.append((image_info, asyncio.create_task(self._describe_image_with_semaphore(semaphore, image_path, prompt))))
-        
-        # 等待所有任务完成
-        for image_info, task in tasks:
-            try:
-                description = await task
-                image_info["description"] = description
-            except Exception as e:
-                print(f"描述图片失败: {str(e)}")
-                image_info["description"] = f"[图片描述生成失败: {str(e)}]"
-        
-        # 3. 修改文档，将图片描述添加到文档中
-        modified_document = self._modify_document_with_descriptions(document, images_info)
-        
-        # 4. 保存修改后的文档
-        self._save_document_as_word(modified_document, output_path)
-        
-        print(f"文档处理完成，生成了包含{len(images_info)}个图片描述的Word文档: {output_path}")
-        return output_path
+        try:
+            description = await self._describe_image_with_api_key_pool(image_path, prompt)
+            image_info["description"] = description
+            print(f"成功获取图片描述: {image_path}")
+        except Exception as e:
+            print(f"描述图片失败: {str(e)}")
+            image_info["description"] = f"[图片描述生成失败: {str(e)}]"
 
-    async def _describe_image_with_model_async(self, image_path: str, prompt: str) -> str:
+    async def _describe_image_with_api_key_pool(self, image_path: str, prompt: str) -> str:
         """
-        异步使用多模态模型描述图片
+        使用API密钥池异步描述图片
         
         Args:
             image_path: 图片路径
@@ -821,7 +765,61 @@ class DocumentImageProcessor:
         Returns:
             图片描述
         """
-        print(f"准备描述图片: {image_path}")
+        # 从API密钥池获取可用的API密钥
+        async with self.api_key_semaphore:
+            # 获取可用的API密钥
+            api_key = await self._get_available_api_key()
+            
+            try:
+                # 标记API密钥为使用中
+                self.api_key_in_use[api_key] = True
+                
+                # 使用选中的API密钥发送请求
+                return await self._send_image_description_request(image_path, prompt, api_key)
+            finally:
+                # 无论成功失败，都标记API密钥为可用
+                self.api_key_in_use[api_key] = False
+                # 更新最后使用时间
+                self.api_key_last_used[api_key] = time.time()
+    
+    async def _get_available_api_key(self) -> str:
+        """
+        获取当前可用的API密钥，优先选择未被使用的密钥
+        
+        Returns:
+            API密钥
+        """
+        # 首先尝试获取未被使用的密钥
+        available_keys = [key for key, in_use in self.api_key_in_use.items() if not in_use]
+        
+        if available_keys:
+            # 如果有未使用的密钥，按最后使用时间排序
+            sorted_keys = sorted([(key, self.api_key_last_used[key]) for key in available_keys], 
+                                key=lambda x: x[1])
+            return sorted_keys[0][0]
+        else:
+            # 如果所有密钥都在使用中，等待任意一个密钥变为可用
+            while True:
+                await asyncio.sleep(0.1)  # 短暂等待
+                available_keys = [key for key, in_use in self.api_key_in_use.items() if not in_use]
+                if available_keys:
+                    sorted_keys = sorted([(key, self.api_key_last_used[key]) for key in available_keys], 
+                                        key=lambda x: x[1])
+                    return sorted_keys[0][0]
+    
+    async def _send_image_description_request(self, image_path: str, prompt: str, api_key: str) -> str:
+        """
+        发送图片描述请求
+        
+        Args:
+            image_path: 图片路径
+            prompt: 描述提示词
+            api_key: API密钥
+            
+        Returns:
+            图片描述
+        """
+        print(f"使用API密钥 {api_key[:8]}... 处理图片: {image_path}")
         
         try:
             # 读取图片并转换为base64
@@ -831,7 +829,7 @@ class DocumentImageProcessor:
             # 构建API请求
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
+                "Authorization": f"Bearer {api_key}"
             }
             
             # 使用Moonshot多模态API
@@ -856,18 +854,17 @@ class DocumentImageProcessor:
             
             # 使用aiohttp发送异步请求
             async with aiohttp.ClientSession() as session:
-                max_retries = 5
+                max_retries = 3
                 retry_count = 0
-                retry_delay = 2  # 初始重试延迟（秒）
+                retry_delay = 2
                 
                 while retry_count < max_retries:
                     try:
-                        print(f"发送API请求: {image_path}")
                         async with session.post(
                             f"{self.api_base}/chat/completions",
                             headers=headers,
                             json=payload,
-                            timeout=60  # 设置较长的超时时间
+                            timeout=60
                         ) as response:
                             if response.status == 200:
                                 result = await response.json()
@@ -875,29 +872,28 @@ class DocumentImageProcessor:
                                 print(f"成功获取图片描述: {image_path}")
                                 return description
                             elif response.status == 429:
-                                # 遇到速率限制，等待后重试
-                                response_text = await response.text()
-                                print(f"API请求受到速率限制，等待{retry_delay}秒后重试... ({retry_count+1}/{max_retries})")
+                                # 速率限制，检查响应头中的Retry-After
+                                retry_after = response.headers.get('Retry-After')
+                                wait_time = int(retry_after) if retry_after and retry_after.isdigit() else retry_delay
                                 
-                                # 指数退避策略
-                                await asyncio.sleep(retry_delay)
-                                retry_delay *= 1.5  # 增加重试延迟
+                                response_text = await response.text()
+                                print(f"API密钥 {api_key[:8]}... 请求受到速率限制，等待{wait_time}秒后重试")
+                                await asyncio.sleep(wait_time)
+                                retry_delay = max(retry_delay * 1.5, wait_time * 1.2)  # 动态调整重试延迟
                                 retry_count += 1
                             else:
                                 response_text = await response.text()
-                                print(f"API请求失败: {response.status} {response_text}")
-                                return f"[图片描述生成失败: API错误 {response.status}]"
+                                raise Exception(f"API错误 {response.status}: {response_text}")
                     except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                        print(f"请求出错: {str(e)}，等待{retry_delay}秒后重试... ({retry_count+1}/{max_retries})")
+                        print(f"请求出错: {str(e)}，等待{retry_delay}秒后重试")
                         await asyncio.sleep(retry_delay)
                         retry_delay *= 1.5
                         retry_count += 1
                 
-                return "[图片描述生成失败: 超过最大重试次数]"
+                raise Exception("超过最大重试次数")
                 
         except Exception as e:
-            print(f"图片描述生成失败: {str(e)}")
-            return f"[图片描述生成失败: {str(e)}]"
+            raise Exception(f"描述图片失败: {str(e)}")
 
     async def _describe_image_with_semaphore(self, semaphore, image_path: str, prompt: str) -> str:
         """
@@ -942,8 +938,28 @@ class DocumentImageProcessor:
             print("警告: 未从文档中提取到任何图片，返回原始文档内容")
             return document.export_to_markdown()
         
-        # 2. 串行处理每张图片，避免速率限制
-        await self._process_images_serially(images_info)
+        # 2. 创建所有图片描述任务
+        prompt = """请分析这张图片并提供详细描述。根据图片类型给出适当的描述:
+        
+        - 如果是流程图或架构图: 详细描述各个组件、流程步骤、数据流向和逻辑关系
+        - 如果是表格: 描述表格结构、列名和主要数据内容
+        - 如果是图表(如柱状图、饼图等): 解释图表表达的数据关系、趋势和关键数据点
+        - 如果是界面截图: 描述界面布局、功能区域和主要控件
+        - 如果是其他类型图片: 描述图片中的主要视觉元素和内容
+        
+        请确保描述全面、准确，覆盖图片中的所有重要信息，包括任何文本内容。"""
+        
+        # 创建任务列表
+        tasks = []
+        for i, image_info in enumerate(images_info):
+            image_path = image_info["image_path"]
+            print(f"创建图片描述任务 {i+1}/{len(images_info)}: {image_path}")
+            task = self._process_single_image(image_info, image_path, prompt)
+            tasks.append(task)
+        
+        # 并发执行所有任务
+        print(f"开始并发处理 {len(tasks)} 个图片描述任务")
+        await asyncio.gather(*tasks)
         
         # 3. 生成包含图片描述的文本
         markdown_text = document.export_to_markdown()
@@ -1184,13 +1200,12 @@ if __name__ == "__main__":
     import asyncio
     
     async def main():
-        # API密钥列表
+        # 新的API密钥列表（来自不同账号）
         api_keys = [
-            "sk-FefbDs44DxjdtEeQMBpWDe1WZtAFHsle55dSnTUuGv50uUXx",
-            "sk-dVPXuV51GCEMFOOnOqQeZotbfZEZjjfxkoeFSXgpGFgjGySg",
-            "sk-u0hQz4udGiB92w8MrOQPra0ygcknMMcMxNZbVA3c8TjHVA1n",
-            "sk-6rcTKDTON9y0FVM4Dy6eHQHFAqdIyJaD5X8ZgrUNzYP8z0zC",
-            "sk-dYB0ZVpD7mstEcvbR97jwuKqAEgZEsvY45qR8cPVruoX7XA1"
+            "sk-fCgBeG8ETu8MMCIaAmdOI4JpOKKagF7qXNIE4kIhu2q8zEU3",  # 替换为您的第一个API密钥
+            "sk-n9Kb2lFGyV3LJ0GEwg3NBjy5ZrJk3qTlNJJt4Kfkro7T8Fct",  # 替换为您的第二个API密钥
+            "sk-GwCmhwrrhicbkbishgUhYmVg6IrAJkg4mwWPNIMpdkQBe8tr",  # 替换为您的第三个API密钥
+            "sk-3vO3Ku08wFZBRREAWGxPWKYtEcUE8pZ1ResjWOa0RvBLz2aM",  # 替换为您的第四个API密钥
         ]
         
         # 创建处理器实例
@@ -1198,8 +1213,7 @@ if __name__ == "__main__":
             api_keys=api_keys,
             api_base="https://api.moonshot.cn/v1",
             multimodal_model="moonshot-v1-32k-vision-preview",
-            max_concurrent_requests=1,  # 设置为1，强制串行处理
-            min_api_interval=5  # 同一API密钥最小调用间隔(秒)
+            max_concurrent_requests=4  # 设置为API密钥数量
         )
         
         # 处理文档并输出文本
@@ -1208,7 +1222,7 @@ if __name__ == "__main__":
         
         print(f"开始处理文档: {document_path}")
         
-        # 处理文档并获取文本内容
+        # 使用异步方法处理文档
         result_text = await processor.process_document_to_text(document_path)
         
         # 保存结果到文件
@@ -1223,6 +1237,7 @@ if __name__ == "__main__":
 
     # 运行异步主函数
     asyncio.run(main())
+
 
 
 
