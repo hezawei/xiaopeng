@@ -62,7 +62,7 @@
               type="text" 
               id="analysis-query" 
               class="form-control" 
-              placeholder="请输入您想分析的问题，例如：'分析文档中的主要功能需求'"
+              placeholder="请输入您想分析的问题，例如：'目标 技术选型 计划'"
               v-model="analysisQuery"
             >
           </div>
@@ -179,7 +179,7 @@ const activeMenu = ref('requirement-analysis');
 const uploadedFiles = ref([]);
 const uploadedFileIds = ref([]);
 const requirementDescription = ref('');
-const analysisQuery = ref('分析这个文档的主要需求和功能点');
+const analysisQuery = ref('目标 技术选型 计划');
 const isAnalyzing = ref(false);
 const loadingMessage = ref('正在分析需求，请稍候...');
 const analysisResult = ref(null);

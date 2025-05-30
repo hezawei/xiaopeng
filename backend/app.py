@@ -40,22 +40,24 @@ class ConnectionManager:
         self.active_connections[client_id] = websocket
 
     def disconnect(self, client_id: str):
+        """同步方法，移除连接"""
         if client_id in self.active_connections:
             del self.active_connections[client_id]
 
     async def send_message(self, client_id: str, message: str):
+        """异步方法，发送消息"""
         if client_id in self.active_connections:
             await self.active_connections[client_id].send_text(message)
     
     async def close_connection(self, client_id: str):
-        """主动关闭WebSocket连接"""
+        """异步方法，主动关闭WebSocket连接"""
         if client_id in self.active_connections:
             try:
                 await self.active_connections[client_id].close()
             except Exception as e:
                 print(f"关闭WebSocket连接出错: {str(e)}")
             finally:
-                self.disconnect(client_id)
+                self.disconnect(client_id)  # 注意这里是同步调用
 
 manager = ConnectionManager()
 
@@ -127,7 +129,7 @@ async def analyze_document(request: AnalysisRequest):
             )
         
         # 处理文档并执行查询
-        result = processor.process_and_query(
+        result = await processor.process_and_query(
             file_path=file_paths[0],  # 目前只处理第一个文件
             query=request.query,
             chunk_method="sentence"
@@ -149,7 +151,7 @@ async def analyze_document(request: AnalysisRequest):
 @app.websocket("/ws/analyze/{client_id}")
 async def websocket_analyze(websocket: WebSocket, client_id: str):
     await manager.connect(websocket, client_id)
-    print(f"WebSocket连接已建立: {client_id}")
+    print(f"客户端 {client_id} 已连接")
     
     try:
         # 只处理一次请求，不使用无限循环
@@ -179,16 +181,27 @@ async def websocket_analyze(websocket: WebSocket, client_id: str):
         }))
         print(f"已发送确认消息给客户端 {client_id}")
         
-        # 初始化文档处理器
-        processor = LlamaIndexDocumentProcessor(
-            embedding_model_type="huggingface",
-            embedding_model_name="BAAI/bge-small-zh-v1.5",
-            use_deepseek_llm=True
-        )
+        # 使用文档处理器工厂创建统一处理器
+        from my.document_processor_factory import DocumentProcessorFactory
+        processor = DocumentProcessorFactory.create_processor({
+            "embedding": {
+                "model_type": "huggingface",
+                "model_name": "BAAI/bge-small-zh-v1.5"
+            },
+            "llm": {
+                "use_deepseek": True
+            },
+            "multimodal": {
+                "api_base": "https://api.moonshot.cn/v1",
+                "model": "moonshot-v1-32k-vision-preview",
+                "max_concurrent": 4
+            }
+        })
         
         # 获取文件路径
         file_paths = []
         for file_id in data.get("file_ids", []):
+            # 查找匹配的文件
             for filename in os.listdir(UPLOAD_DIR):
                 if filename.startswith(file_id):
                     file_paths.append(os.path.join(UPLOAD_DIR, filename))
@@ -199,29 +212,16 @@ async def websocket_analyze(websocket: WebSocket, client_id: str):
                 "type": "error",
                 "message": "未找到指定的文件"
             }))
-            return  # 出错时直接返回，不继续处理
+            return
         
-        # 发送处理状态
+        # 发送处理状态更新
         await manager.send_message(client_id, json.dumps({
             "type": "status",
-            "message": "正在加载文档..."
-        }))
-        
-        # 模拟处理过程的各个阶段
-        await asyncio.sleep(1)
-        await manager.send_message(client_id, json.dumps({
-            "type": "status",
-            "message": "正在分析文档内容..."
-        }))
-        
-        await asyncio.sleep(1)
-        await manager.send_message(client_id, json.dumps({
-            "type": "status",
-            "message": "正在生成分析结果..."
+            "message": "正在处理文档，这可能需要一些时间..."
         }))
         
         # 处理文档并执行查询
-        result = processor.process_and_query(
+        result = await processor.process_and_query(
             file_path=file_paths[0],  # 目前只处理第一个文件
             query=data.get("query", "分析这个文档的主要需求和功能点"),
             chunk_method="sentence"
@@ -250,27 +250,23 @@ async def websocket_analyze(websocket: WebSocket, client_id: str):
         # 等待一段时间，让客户端有机会处理结果
         await asyncio.sleep(2)
         
-        # 不再等待更多消息，函数结束后WebSocket连接将关闭
-        
     except WebSocketDisconnect:
         print(f"客户端 {client_id} 断开连接")
-        manager.disconnect(client_id)
+        manager.disconnect(client_id)  # 同步方法，不需要await
     except Exception as e:
-        # 发送错误消息
-        print(f"处理过程中出错: {str(e)}")
+        error_msg = f"处理请求时出错: {str(e)}"
+        print(error_msg)
         try:
             await manager.send_message(client_id, json.dumps({
                 "type": "error",
-                "message": f"处理过程中出错: {str(e)}"
+                "message": error_msg
             }))
         except:
             pass
-        manager.disconnect(client_id)
+        finally:
+            manager.disconnect(client_id)  # 同步方法，不需要await
     finally:
-        # 确保断开连接
-        if client_id in manager.active_connections:
-            manager.disconnect(client_id)
-        print(f"WebSocket处理完成，客户端 {client_id} 已断开连接")
+        print(f"客户端 {client_id} 已断开连接")
 
 # 添加健康检查接口
 @app.get("/api/health")
@@ -340,6 +336,12 @@ async def delete_files(request: Dict[str, Any]):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+
+
+
 
 
 

@@ -13,54 +13,79 @@ result = await processor.process_document("path/to/document.docx", "分析这个
 """
 
 import os
-from typing import Union, Dict, Any, List
+import uuid
+from typing import Union, Dict, Any, List, Optional
 import asyncio
 
 from my.document_image_processor import DocumentImageProcessor
 from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
+from llama_index.core import SimpleDirectoryReader, Document
 
 class DocumentProcessorFactory:
     """文档处理器工厂类，根据文档类型创建合适的处理器"""
     
     @staticmethod
-    def create_processor(
-        embedding_model_type: str = "huggingface",
-        embedding_model_name: str = "BAAI/bge-small-zh-v1.5",
-        use_deepseek_llm: bool = True,
-        api_base: str = "https://api.moonshot.cn/v1",
-        multimodal_model: str = "moonshot-v1-32k-vision-preview",
-        max_concurrent_requests: int = 4
-    ):
+    def create_processor(config: Optional[Dict[str, Any]] = None) -> "UnifiedDocumentProcessor":
         """
         创建统一的文档处理器
         
         Args:
-            embedding_model_type: 嵌入模型类型
-            embedding_model_name: 嵌入模型名称
-            use_deepseek_llm: 是否使用DeepSeek LLM
-            api_base: 多模态API基础URL
-            multimodal_model: 多模态模型名称
-            max_concurrent_requests: 最大并发请求数
+            config: 配置字典，包含embedding、llm和multimodal的配置
             
         Returns:
             UnifiedDocumentProcessor实例
         """
-        # 创建图片处理器
-        image_processor = DocumentImageProcessor(
-            api_base=api_base,
-            multimodal_model=multimodal_model,
-            max_concurrent_requests=max_concurrent_requests
-        )
+        if config is None:
+            config = {}
         
-        # 创建LlamaIndex处理器
-        llamaindex_processor = LlamaIndexDocumentProcessor(
-            embedding_model_type=embedding_model_type,
-            embedding_model_name=embedding_model_name,
-            use_deepseek_llm=use_deepseek_llm
-        )
+        # 设置默认配置
+        default_config = {
+            "embedding": {
+                "model_type": "huggingface",
+                "model_name": "BAAI/bge-small-zh-v1.5"
+            },
+            "llm": {
+                "use_deepseek": True
+            },
+            "multimodal": {
+                "api_base": "https://api.moonshot.cn/v1",
+                "model": "moonshot-v1-32k-vision-preview",
+                "max_concurrent": 4
+            }
+        }
         
-        # 创建并返回统一处理器
-        return UnifiedDocumentProcessor(image_processor, llamaindex_processor)
+        # 合并配置
+        embedding_config = {**default_config["embedding"], **(config.get("embedding", {}))}
+        llm_config = {**default_config["llm"], **(config.get("llm", {}))}
+        multimodal_config = {**default_config["multimodal"], **(config.get("multimodal", {}))}
+        
+        try:
+            # 创建图片处理器
+            from my.document_image_processor import DocumentImageProcessor
+            image_processor = DocumentImageProcessor(
+                api_base=multimodal_config["api_base"],
+                multimodal_model=multimodal_config["model"],
+                max_concurrent_requests=multimodal_config["max_concurrent"]
+            )
+            
+            # 创建LlamaIndex处理器
+            from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
+            llamaindex_processor = LlamaIndexDocumentProcessor(
+                embedding_model_type=embedding_config["model_type"],
+                embedding_model_name=embedding_config["model_name"],
+                use_deepseek_llm=llm_config["use_deepseek"]
+            )
+            
+            # 创建并返回统一处理器
+            return UnifiedDocumentProcessor(image_processor, llamaindex_processor)
+        except ImportError as e:
+            print(f"创建处理器时导入错误: {str(e)}")
+            raise
+        except Exception as e:
+            print(f"创建处理器时出错: {str(e)}")
+            raise
+    
+
 
 
 class UnifiedDocumentProcessor:
@@ -84,7 +109,8 @@ class UnifiedDocumentProcessor:
         self.temp_dir = os.path.join(os.getcwd(), "temp_processed_docs")
         os.makedirs(self.temp_dir, exist_ok=True)
     
-    async def process_document(
+    # 重命名为process_and_query以保持一致性
+    async def process_and_query(
         self, 
         file_path: str, 
         query: str,
@@ -101,11 +127,14 @@ class UnifiedDocumentProcessor:
             chunk_method: 分块方法
             use_existing_index: 是否使用现有索引
             top_k: 返回的最相关结果数量
-            
+        
         Returns:
             查询结果
         """
         print(f"开始处理文档: {file_path}")
+        
+        # 获取文件扩展名
+        file_ext = os.path.splitext(file_path.lower())[1]
         
         # 检查文档是否包含图片
         has_images = await self._check_document_has_images(file_path)
@@ -115,35 +144,44 @@ class UnifiedDocumentProcessor:
             # 处理图片并生成带图片描述的文本
             processed_text = await self.image_processor.process_document_to_text(file_path)
             
-            # 将处理后的文本保存为临时文件
-            temp_file_path = os.path.join(
-                self.temp_dir, 
-                f"processed_{os.path.basename(file_path)}.txt"
-            )
+            # 根据文件类型和处理成熟度选择处理方式
+            if file_ext in ('.pdf', '.docx'):
+                # 成熟处理方法的文件类型，直接使用处理后的文本
+                print(f"使用直接方法处理{file_ext}文件")
+                doc = Document(text=processed_text, metadata={"source": file_path})
+                documents = [doc]
+            else:
+                # 其他文件类型，可能需要额外处理
+                print(f"使用SimpleDirectoryReader处理{file_ext}文件")
+                temp_file_path = os.path.join(
+                    self.temp_dir, 
+                    f"processed_{os.path.basename(file_path)}_{uuid.uuid4().hex[:8]}.txt"
+                )
+                
+                with open(temp_file_path, "w", encoding="utf-8") as f:
+                    f.write(processed_text)
+                
+                # 使用SimpleDirectoryReader加载处理后的文本文件
+                reader = SimpleDirectoryReader(input_files=[temp_file_path])
+                documents = reader.load_data()
             
-            with open(temp_file_path, "w", encoding="utf-8") as f:
-                f.write(processed_text)
+            # 分块处理
+            nodes = self.llamaindex_processor.chunk_document(documents, chunk_method)
             
-            print(f"图片处理完成，生成临时文件: {temp_file_path}")
+            # 创建索引
+            index = self.llamaindex_processor.create_index(nodes)
             
-            # 使用LlamaIndex处理器处理临时文件
-            result = self.llamaindex_processor.process_and_query(
-                file_path=temp_file_path,
-                query=query,
-                chunk_method=chunk_method,
-                use_existing_index=use_existing_index,
-                top_k=top_k
-            )
+            # 执行查询
+            result = self.llamaindex_processor.query_index(index, query, top_k)
             
-            # 在结果中添加图片处理信息
+            # 在结果中添加处理信息
             result["processed_with_image_handler"] = True
             result["original_file"] = file_path
-            result["processed_file"] = temp_file_path
             
             return result
         else:
+            # 文档不包含图片，直接使用LlamaIndex处理器
             print("文档不包含图片，直接使用LlamaIndex处理器...")
-            # 直接使用LlamaIndex处理器
             result = self.llamaindex_processor.process_and_query(
                 file_path=file_path,
                 query=query,
@@ -191,3 +229,12 @@ class UnifiedDocumentProcessor:
             print(f"检查文档图片时出错: {str(e)}")
             # 出错时保守返回False
             return False
+
+
+
+
+
+
+
+
+

@@ -161,13 +161,9 @@ class LlamaIndexDocumentProcessor:
     def load_document(self, file_path: str) -> List[Document]:
         """
         加载文档
-
-
-        支持多种文档格式，包括PDF、DOCX、TXT等
-
         
         支持多种文档格式，包括PDF、DOCX、TXT等
-
+        
         Args:
             file_path: 文档路径
             
@@ -187,9 +183,18 @@ class LlamaIndexDocumentProcessor:
             # 创建Document对象
             doc = Document(text=content, metadata={"source": file_path})
             return [doc]
+        elif file_path.endswith('.txt'):
+            # 对于TXT文件，直接读取内容
+            print("直接读取TXT文件内容")
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # 创建Document对象
+            doc = Document(text=content, metadata={"source": file_path})
+            return [doc]
         else:
             # 使用LlamaIndex的SimpleDirectoryReader处理其他类型文件
-            print(f"使用LlamaIndex处理文件")
+            print(f"使用SimpleDirectoryReader处理文件")
             reader = SimpleDirectoryReader(input_files=[file_path])
             return reader.load_data()
 
@@ -424,6 +429,7 @@ if __name__ == "__main__":
     for i, node in enumerate(result["source_nodes"]):
         print(f"\n--- 文本块 {i+1} (相关度: {node['score']:.4f}) ---")
         print(node["text"] + "...")
+
 
 
 
