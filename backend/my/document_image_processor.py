@@ -221,13 +221,20 @@ class DocumentImageProcessor:
         Returns:
             图片信息列表，每个元素包含图片路径和在文档中的位置信息
         """
+
+        """
+        代码的核心价值
+        模拟人类阅读顺序：按文档中段落→表格→段落的实际显示顺序遍历，确保图片提取顺序与用户看到的一致。
+        解决 rels 无序问题：Word 内部的rels存储顺序可能与文档显示顺序无关，代码通过遍历内容，强制按显示顺序标记图片。
+        生活类比：整理书架上的照片
+        rels：所有照片的编号（无序堆在盒子里）。
+        遍历段落 / 表格：按书架上照片的摆放顺序（先左列第 1 张，再中间表格里的第 2 张，再右列第 3 张），逐个标记编号。
+        提取：按标记顺序从盒子里拿照片，确保书架上的顺序和提取顺序一致。
+        """
+        
         # 提取文档中的所有图片
         images_info = []
         picture_counter = 0
-        extraction_method = "unknown"
-        
-        # 调试信息
-        print("开始提取图片...")
         
         # 根据文档类型选择最佳提取方法
         if original_file_path:
@@ -238,10 +245,8 @@ class DocumentImageProcessor:
                 print("使用python-docx库提取Word文档图片...")
                 try:
                     import docx
-                    from docx.document import Document as DocxDocument
                     from docx.parts.image import ImagePart
                     
-                    extraction_method = "python-docx"
                     doc = docx.Document(original_file_path)
                     
                     # 存储所有图片关系
@@ -296,10 +301,8 @@ class DocumentImageProcessor:
                         # 记录图片信息
                         images_info.append({
                             "image_path": image_path,
-                            "rel_id": rel_id,
-                            "document_index": doc_idx,
                             "position": picture_counter,
-                            "extraction_method": extraction_method
+                            "location_info": f"Word文档中的第{doc_idx+1}张图片(ID:{rel_id})"
                         })
                 except Exception as e:
                     print(f"使用python-docx提取图片时出错: {str(e)}")
@@ -309,10 +312,8 @@ class DocumentImageProcessor:
                 try:
                     import fitz  # PyMuPDF
                     print("使用PyMuPDF提取PDF图片...")
-                    extraction_method = "pymupdf"
                     
                     doc = fitz.open(original_file_path)
-                    doc_idx = 0
                     
                     for page_idx, page in enumerate(doc):
                         # 获取页面上的图片
@@ -333,14 +334,9 @@ class DocumentImageProcessor:
                             
                             images_info.append({
                                 "image_path": image_path,
-                                "page_idx": page_idx,
-                                "img_idx": img_idx,
-                                "document_index": doc_idx,
                                 "position": picture_counter,
-                                "extraction_method": extraction_method
+                                "location_info": f"PDF第{page_idx+1}页的第{img_idx+1}张图片"
                             })
-                            
-                            doc_idx += 1
                     
                     doc.close()
                 except Exception as e:
@@ -350,7 +346,7 @@ class DocumentImageProcessor:
         else:
             print("未提供原始文件路径，无法提取图片")
         
-        print(f"总共提取到 {len(images_info)} 张图片，使用方法: {extraction_method}")
+        print(f"总共提取到 {len(images_info)} 张图片")
         return images_info
 
 
@@ -461,6 +457,7 @@ class DocumentImageProcessor:
             # 尝试多种可能的图片标记
             image_markers = ["<image>", "![", "<img"]
             replaced = False
+            description = image_info.get("description", "[无图片描述]")
             
             for marker in image_markers:
                 if marker in result_text:
@@ -474,7 +471,7 @@ class DocumentImageProcessor:
                         if end_pos > marker_pos:
                             # 替换整个图片标记
                             old_text = result_text[marker_pos:end_pos+1]
-                            new_text = f"\n[图片描述: {image_info['description']}]\n"
+                            new_text = f"\n[图片描述: {description}]\n"
                             result_text = result_text.replace(old_text, new_text, 1)
                             replaced = True
                             break
@@ -484,7 +481,7 @@ class DocumentImageProcessor:
                         if end_pos > marker_pos:
                             # 替换整个图片标记
                             old_text = result_text[marker_pos:end_pos+1]
-                            new_text = f"\n[图片描述: {image_info['description']}]\n"
+                            new_text = f"\n[图片描述: {description}]\n"
                             result_text = result_text.replace(old_text, new_text, 1)
                             replaced = True
                             break
@@ -492,7 +489,7 @@ class DocumentImageProcessor:
                         # 直接替换标记
                         result_text = result_text.replace(
                             marker, 
-                            f"\n[图片描述: {image_info['description']}]\n", 
+                            f"\n[图片描述: {description}]\n", 
                             1  # 只替换第一次出现的标记
                         )
                         replaced = True
@@ -500,7 +497,9 @@ class DocumentImageProcessor:
             
             # 如果没有找到任何标记，则在文档末尾添加图片描述
             if not replaced:
-                result_text += f"\n\n[图片 {image_info['position']} 描述: {image_info['description']}]\n"
+                position = image_info["position"]
+                location = image_info.get("location_info", f"图片{position}")
+                result_text += f"\n\n[{location} 描述: {description}]\n"
         
         return result_text
     
@@ -525,29 +524,27 @@ class DocumentImageProcessor:
         modified_text += "\n\n## 文档图片描述\n\n"
         
         # 为每个图片添加描述
-        for i, image_info in enumerate(images_info):
-            image_path = image_info["image_path"]
+        for i, image_info in enumerate(sorted(images_info, key=lambda x: x["position"])):
             description = image_info.get("description", "[无图片描述]")
-            
-            # 尝试确定图片在文档中的位置
-            position_info = ""
-            if "rel_id" in image_info:
-                position_info = f"(文档中的第{i+1}张图片)"
-            elif "page_idx" in image_info:
-                position_info = f"(第{image_info['page_idx']+1}页的图片)"
-            else:
-                position_info = f"(图片{i+1})"
+            location = image_info.get("location_info", f"图片{i+1}")
             
             # 添加图片描述
-            modified_text += f"### 图片{i+1} {position_info}\n\n"
+            modified_text += f"### 图片{i+1} ({location})\n\n"
             modified_text += f"{description}\n\n"
-            print(f"添加了图片描述: 图片{i+1} {position_info}")
         
-        # 创建一个新的文档对象
-        # 由于无法直接修改DoclingDocument对象，我们返回原始文档，但在保存时使用修改后的文本
-        document._modified_text = modified_text  # 添加一个自定义属性存储修改后的文本
-        
-        return document
+        # 创建新的文档对象
+        # 注意：这里假设DoclingDocument有一个from_markdown方法
+        # 如果没有，需要根据实际情况调整
+        try:
+            new_document = DoclingDocument.from_markdown(modified_text)
+            return new_document
+        except AttributeError:
+            # 如果没有from_markdown方法，则返回原始文档
+            # 并在日志中记录警告
+            print("警告: 无法创建新的文档对象，返回原始文档")
+            # 将修改后的文本保存到文档对象的某个属性中
+            document._modified_text = modified_text
+            return document
     
     def _find_parent_elements(self, document: DoclingDocument, element_id: str) -> Optional[Tuple[Any, int]]:
         """
@@ -820,7 +817,7 @@ class DocumentImageProcessor:
                             f"{self.api_base}/chat/completions",
                             headers=headers,
                             json=payload,
-                            timeout=60
+                            timeout=100
                         ) as response:
                             if response.status == 200:
                                 result = await response.json()
@@ -948,9 +945,11 @@ class DocumentImageProcessor:
         
         print(f"在文档中找到 {len(image_markers)} 个图片标记")
         
-        # 如果标记数量与图片数量不匹配，记录警告
+        # 如果标记数量与图片数量不匹配，抛出异常中止处理
         if len(image_markers) != len(images_info):
-            print(f"警告: 图片标记数量({len(image_markers)})与图片数量({len(images_info)})不匹配")
+            error_msg = f"错误: 图片标记数量({len(image_markers)})与图片数量({len(images_info)})不匹配，无法继续处理"
+            print(error_msg)
+            raise ValueError(error_msg)
         
         # 按照图片在文档中的位置排序
         sorted_images = sorted(images_info, key=lambda x: x.get("position", 0))
@@ -1004,6 +1003,8 @@ if __name__ == "__main__":
 
     # 运行异步主函数
     asyncio.run(main())
+
+
 
 
 
