@@ -69,17 +69,10 @@
           <div class="button-group">
             <button 
               class="btn btn-primary" 
-              @click="startAnalysisHttp"
-              :disabled="isAnalyzing || uploadedFileIds.length === 0"
-            >
-              HTTP分析
-            </button>
-            <button 
-              class="btn btn-accent" 
               @click="startAnalysisWebSocket"
               :disabled="isAnalyzing || uploadedFileIds.length === 0"
             >
-              WebSocket实时分析
+              开始分析
             </button>
           </div>
 
@@ -356,64 +349,19 @@ const resetFileUpload = () => {
   }
 };
 
-const startAnalysisHttp = async () => {
+const startAnalysis = () => {
   if (uploadedFileIds.value.length === 0) {
     addLog('error', '请先上传文件');
     return;
   }
   
   isAnalyzing.value = true;
-  loadingMessage.value = '正在通过HTTP分析需求，请稍候...';
-  processingLogs.value = [];
-  analysisResult.value = null;
-  
-  try {
-    addLog('info', '开始HTTP分析请求');
-    
-    const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        file_ids: uploadedFileIds.value,
-        description: requirementDescription.value,
-        query: analysisQuery.value
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (result.status === 'success') {
-      addLog('success', '分析完成');
-      analysisResult.value = result.result;
-    } else {
-      addLog('error', `分析失败: ${result.message}`);
-    }
-  } catch (error) {
-    console.error('分析过程出错:', error);
-    addLog('error', `分析过程出错: ${error.message}`);
-  } finally {
-    isAnalyzing.value = false;
-  }
-};
-
-
-const startAnalysisWebSocket = () => {
-  if (uploadedFileIds.value.length === 0) {
-    addLog('error', '请先上传文件');
-    return;
-  }
-  
-  isAnalyzing.value = true;
-  loadingMessage.value = '正在通过WebSocket实时分析需求...';
+  loadingMessage.value = '正在分析需求...';
   processingLogs.value = [];
   analysisResult.value = null;
   
   // 创建WebSocket连接
   connectWebSocket();
-  
-  // 不再使用setTimeout发送请求，而是在onopen事件中发送
 };
 
 const connectWebSocket = () => {
@@ -1256,7 +1204,44 @@ textarea.form-control {
     max-width: 200px;
   }
 }
+
+/* 更新按钮样式，使单个按钮居中显示 */
+.button-group {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.button-group .btn {
+  padding: 10px 30px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:disabled {
+  background-color: #cccccc;
+  border-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
 </style>
+
+
+
 
 
 
