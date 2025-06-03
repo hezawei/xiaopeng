@@ -69,7 +69,7 @@
           <div class="button-group">
             <button 
               class="btn btn-primary" 
-              @click="startAnalysisWebSocket"
+              @click="startAnalysis"
               :disabled="isAnalyzing || uploadedFileIds.length === 0"
             >
               开始分析
