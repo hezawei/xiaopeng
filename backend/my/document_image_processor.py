@@ -96,7 +96,7 @@ class DocumentImageProcessor:
     
     def _extract_images_from_document(self, document: DoclingDocument, original_file_path: str = None) -> List[Dict[str, Any]]:
         """
-        从文档中提取所有图片
+        从文档中提取主要图片（与Markdown标记对应的图片）
         
         Args:
             document: 文档对象
@@ -105,16 +105,10 @@ class DocumentImageProcessor:
         Returns:
             图片信息列表，每个元素包含图片路径和在文档中的位置信息
         """
-
-        """
-        代码的核心价值
-        模拟人类阅读顺序：按文档中段落→表格→段落的实际显示顺序遍历，确保图片提取顺序与用户看到的一致。
-        解决 rels 无序问题：Word 内部的rels存储顺序可能与文档显示顺序无关，代码通过遍历内容，强制按显示顺序标记图片。
-        生活类比：整理书架上的照片
-        rels：所有照片的编号（无序堆在盒子里）。
-        遍历段落 / 表格：按书架上照片的摆放顺序（先左列第 1 张，再中间表格里的第 2 张，再右列第 3 张），逐个标记编号。
-        提取：按标记顺序从盒子里拿照片，确保书架上的顺序和提取顺序一致。
-        """
+        # 获取文档的Markdown文本，用于计算图片标记数量
+        markdown_text = document.export_to_markdown()
+        image_marker_count = markdown_text.count("<!-- image -->")
+        print(f"Markdown中包含 {image_marker_count} 个图片标记")
         
         # 提取文档中的所有图片
         images_info = []
@@ -139,10 +133,10 @@ class DocumentImageProcessor:
                         if isinstance(rel.target_part, ImagePart):
                             image_rels[rel_id] = rel
                     
-                    # 遍历文档中的所有段落和表格，查找图片引用
+                    # 遍历文档中的所有段落，查找主要图片引用（不在表格中的图片）
                     ordered_rel_ids = []
                     
-                    # 检查文档主体中的图片
+                    # 检查文档主体中的图片（不在表格中的图片）
                     for paragraph in doc.paragraphs:
                         for run in paragraph.runs:
                             # 检查run的XML内容中的图片引用
@@ -150,23 +144,18 @@ class DocumentImageProcessor:
                             for rel_id in image_rels.keys():
                                 # 在XML中查找图片关系ID
                                 if rel_id in xml and rel_id not in ordered_rel_ids:
-                                    ordered_rel_ids.append(rel_id)
-                    
-                    # 检查表格中的图片
-                    for table in doc.tables:
-                        for row in table.rows:
-                            for cell in row.cells:
-                                for paragraph in cell.paragraphs:
-                                    for run in paragraph.runs:
-                                        xml = run._element.xml
-                                        for rel_id in image_rels.keys():
-                                            if rel_id in xml and rel_id not in ordered_rel_ids:
-                                                ordered_rel_ids.append(rel_id)
-                    
-                    # 添加任何可能在遍历过程中遗漏的图片关系
-                    for rel_id in image_rels.keys():
-                        if rel_id not in ordered_rel_ids:
-                            ordered_rel_ids.append(rel_id)
+                                    # 检查这个图片是否在表格中
+                                    is_in_table = False
+                                    parent = run._element
+                                    while parent is not None:
+                                        if parent.tag.endswith('tbl'):
+                                            is_in_table = True
+                                            break
+                                        parent = parent.getparent()
+                                    
+                                    # 只添加不在表格中的图片
+                                    if not is_in_table:
+                                        ordered_rel_ids.append(rel_id)
                     
                     # 按照找到的顺序提取图片
                     for doc_idx, rel_id in enumerate(ordered_rel_ids):
@@ -186,10 +175,12 @@ class DocumentImageProcessor:
                         images_info.append({
                             "image_path": image_path,
                             "position": picture_counter,
-                            "location_info": f"Word文档中的第{doc_idx+1}张图片(ID:{rel_id})"
+                            "location_info": f"Word文档中的第{doc_idx+1}张主图片(ID:{rel_id})"
                         })
                 except Exception as e:
                     print(f"使用python-docx提取图片时出错: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
             
             # 对于PDF文档，使用PyMuPDF方法
             elif file_ext == '.pdf':
@@ -198,6 +189,7 @@ class DocumentImageProcessor:
                     print("使用PyMuPDF提取PDF图片...")
                     
                     doc = fitz.open(original_file_path)
+                    all_images = []
                     
                     for page_idx, page in enumerate(doc):
                         # 获取页面上的图片
@@ -209,28 +201,40 @@ class DocumentImageProcessor:
                             base_image = doc.extract_image(xref)
                             image_data = base_image["image"]
                             
-                            picture_counter += 1
-                            image_filename = f"pdf_image_{page_idx}_{img_idx}_{uuid.uuid4().hex[:8]}.png"
-                            image_path = os.path.join(self.temp_image_dir, image_filename)
-                            
-                            with open(image_path, "wb") as f:
-                                f.write(image_data)
-                            
-                            images_info.append({
-                                "image_path": image_path,
-                                "position": picture_counter,
-                                "location_info": f"PDF第{page_idx+1}页的第{img_idx+1}张图片"
+                            # 记录图片信息
+                            all_images.append({
+                                "page_idx": page_idx,
+                                "img_idx": img_idx,
+                                "xref": xref,
+                                "image_data": image_data
                             })
+                    
+                    # 保存选定的图片
+                    for idx, img_info in enumerate(all_images):
+                        picture_counter += 1
+                        image_filename = f"pdf_image_{img_info['page_idx']}_{img_info['img_idx']}_{uuid.uuid4().hex[:8]}.png"
+                        image_path = os.path.join(self.temp_image_dir, image_filename)
+                        
+                        with open(image_path, "wb") as f:
+                            f.write(img_info["image_data"])
+                        
+                        images_info.append({
+                            "image_path": image_path,
+                            "position": picture_counter,
+                            "location_info": f"PDF第{img_info['page_idx']+1}页的第{img_info['img_idx']+1}张图片"
+                        })
                     
                     doc.close()
                 except Exception as e:
                     print(f"使用PyMuPDF提取图片时出错: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
             else:
                 print(f"不支持的文件类型: {file_ext}，无法提取图片")
         else:
             print("未提供原始文件路径，无法提取图片")
         
-        print(f"总共提取到 {len(images_info)} 张图片")
+        print(f"总共提取到 {len(images_info)} 张主要图片")
         return images_info
 
     async def _process_single_image(self, image_info: Dict[str, Any], image_path: str, prompt: str) -> None:
@@ -426,6 +430,12 @@ class DocumentImageProcessor:
             print("警告: 未从文档中提取到任何图片，返回原始文档内容")
             return markdown_text
         
+        # 检查图片数量与标记数量是否匹配
+        if image_marker_count != len(images_info):
+            print(f"警告: 图片标记数量({image_marker_count})与提取的图片数量({len(images_info)})不匹配")
+            print("返回原始文档内容，不进行图片描述替换")
+            return markdown_text
+        
         # 2. 创建所有图片描述任务
         prompt = """请分析这张图片并提供详细描述。根据图片类型给出适当的描述:
         
@@ -454,11 +464,16 @@ class DocumentImageProcessor:
             desc = image_info.get("description", "[无描述]")
             print(f"图片 {i+1} 描述: {desc[:50]}...")
         
-        # 3. 将图片标记替换为图片描述
-        result_text = self._replace_images_with_descriptions(markdown_text, images_info)
-        
-        print(f"文档处理完成，生成了包含{len(images_info)}个图片描述的文本")
-        return result_text
+        try:
+            # 3. 将图片标记替换为图片描述
+            result_text = self._replace_images_with_descriptions(markdown_text, images_info)
+            print(f"文档处理完成，生成了包含{len(images_info)}个图片描述的文本")
+            return result_text
+        except ValueError as e:
+            # 如果替换过程中出错，返回原始文档
+            print(f"替换图片描述时出错: {str(e)}")
+            print("返回原始文档内容，不进行图片描述替换")
+            return markdown_text
 
     def _replace_images_with_descriptions(self, text: str, images_info: List[Dict[str, Any]]) -> str:
         """
@@ -487,7 +502,7 @@ class DocumentImageProcessor:
         
         print(f"在文档中找到 {len(image_markers)} 个图片标记")
         
-        # 如果标记数量与图片数量不匹配，抛出异常中止处理
+        # 如果标记数量与图片数量不匹配，抛出错误
         if len(image_markers) != len(images_info):
             error_msg = f"错误: 图片标记数量({len(image_markers)})与图片数量({len(images_info)})不匹配，无法继续处理"
             print(error_msg)
@@ -497,7 +512,7 @@ class DocumentImageProcessor:
         sorted_images = sorted(images_info, key=lambda x: x.get("position", 0))
         
         # 从后向前替换，避免位置偏移
-        for i in range(min(len(image_markers), len(sorted_images)) - 1, -1, -1):
+        for i in range(len(image_markers) - 1, -1, -1):
             marker_pos = image_markers[i]
             image_info = sorted_images[i]
             description = image_info.get("description", "[图片描述生成失败]")
@@ -525,7 +540,7 @@ if __name__ == "__main__":
         )
         
         # 处理文档并输出文本
-        document_path = "AI接口测试系统建设方案.docx"  # 替换为实际的文档路径
+        document_path = "海外三方地图分享地址到车.docx"  # 替换为实际的文档路径
         output_text_path = "example_with_image_descriptions.txt"
         
         print(f"开始处理文档: {document_path}")
@@ -545,6 +560,12 @@ if __name__ == "__main__":
 
     # 运行异步主函数
     asyncio.run(main())
+
+
+
+
+
+
 
 
 
