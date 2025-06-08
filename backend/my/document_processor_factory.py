@@ -11,11 +11,12 @@ processor = DocumentProcessorFactory.create_processor()
 result = await processor.process_document("path/to/document.docx", "分析这个文档的主要内容")
 ```
 """
-
+import os.path
 import os
 import uuid
 from typing import Union, Dict, Any, List, Optional
 import asyncio
+from pathlib import Path  # 确保导入Path类
 
 from my.document_image_processor import DocumentImageProcessor
 from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
@@ -105,9 +106,13 @@ class UnifiedDocumentProcessor:
         """
         self.image_processor = image_processor
         self.llamaindex_processor = llamaindex_processor
+        
+        # 获取脚本所在目录的绝对路径
+        script_dir = Path(__file__).parent.absolute()
+        
         # 创建临时文件目录
-        self.temp_dir = os.path.join(os.getcwd(), "temp_processed_docs")
-        os.makedirs(self.temp_dir, exist_ok=True)
+        self.temp_dir = script_dir / "temp_processed_docs"
+        self.temp_dir.mkdir(exist_ok=True, parents=True)
     
     # 重命名为process_and_query以保持一致性
     async def process_and_query(
@@ -153,16 +158,13 @@ class UnifiedDocumentProcessor:
             else:
                 # 其他文件类型，可能需要额外处理
                 print(f"使用SimpleDirectoryReader处理{file_ext}文件")
-                temp_file_path = os.path.join(
-                    self.temp_dir, 
-                    f"processed_{os.path.basename(file_path)}_{uuid.uuid4().hex[:8]}.txt"
-                )
+                temp_file_path = self.temp_dir / f"processed_{os.path.basename(file_path)}_{uuid.uuid4().hex[:8]}.txt"
                 
                 with open(temp_file_path, "w", encoding="utf-8") as f:
                     f.write(processed_text)
                 
                 # 使用SimpleDirectoryReader加载处理后的文本文件
-                reader = SimpleDirectoryReader(input_files=[temp_file_path])
+                reader = SimpleDirectoryReader(input_files=[str(temp_file_path)])
                 documents = reader.load_data()
             
             # 分块处理
@@ -229,6 +231,10 @@ class UnifiedDocumentProcessor:
             print(f"检查文档图片时出错: {str(e)}")
             # 出错时保守返回False
             return False
+
+
+
+
 
 
 

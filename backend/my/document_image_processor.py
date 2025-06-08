@@ -53,7 +53,7 @@ class DocumentImageProcessor:
         api_base: str = "https://api.moonshot.cn/v1",
         multimodal_model: str = "moonshot-v1-32k-vision-preview",
         max_concurrent_requests: int = 4,
-        temp_dir: str = "./temp_images"
+        temp_dir: str = None
     ):
         """
         初始化文档图片处理器
@@ -79,7 +79,21 @@ class DocumentImageProcessor:
         self.api_base = api_base
         self.multimodal_model = multimodal_model
         self.max_concurrent_requests = min(max_concurrent_requests, len(self.api_keys))
-        self.temp_image_dir = temp_dir
+        
+        # 获取脚本所在目录的绝对路径
+        from pathlib import Path
+        script_dir = Path(__file__).parent.absolute()
+        
+        # 设置临时目录
+        if temp_dir is None:
+            self.temp_image_dir = str(script_dir / "temp_images")
+        else:
+            # 如果提供的是相对路径，则相对于脚本目录
+            temp_path = Path(temp_dir)
+            if not temp_path.is_absolute():
+                self.temp_image_dir = str(script_dir / temp_path)
+            else:
+                self.temp_image_dir = str(temp_path)
         
         # 确保临时目录存在
         os.makedirs(self.temp_image_dir, exist_ok=True)
@@ -529,19 +543,24 @@ class DocumentImageProcessor:
 # 示例用法
 if __name__ == "__main__":
     import asyncio
+    from pathlib import Path
     
     async def main():
+        # 获取脚本所在目录的绝对路径
+        script_dir = Path(__file__).parent.absolute()
+        
         # 创建处理器实例 - 使用默认API密钥
         processor = DocumentImageProcessor(
             # 不需要再次指定API密钥，使用类中默认配置
             api_base="https://api.moonshot.cn/v1",
             multimodal_model="moonshot-v1-32k-vision-preview",
-            max_concurrent_requests=4
+            max_concurrent_requests=4,
+            temp_dir=str(script_dir / "temp_images")
         )
         
         # 处理文档并输出文本
         document_path = "海外三方地图分享地址到车.docx"  # 替换为实际的文档路径
-        output_text_path = "example_with_image_descriptions.txt"
+        output_text_path = str(script_dir / "example_with_image_descriptions.txt")
         
         print(f"开始处理文档: {document_path}")
         
@@ -560,6 +579,8 @@ if __name__ == "__main__":
 
     # 运行异步主函数
     asyncio.run(main())
+
+
 
 
 

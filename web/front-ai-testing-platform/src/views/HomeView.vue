@@ -686,17 +686,6 @@ watch(() => analysisResult.value, (newVal) => {
   }
 });
 
-// 在onMounted中也添加处理
-onMounted(() => {
-  console.log("页面已加载");
-  checkServerStatus();
-  
-  // 初始处理表格
-  if (analysisResult.value) {
-    processTablesAfterRender();
-  }
-});
-
 
 </script>
 
@@ -1239,6 +1228,8 @@ textarea.form-control {
   opacity: 0.7;
 }
 </style>
+
+
 
 
 
