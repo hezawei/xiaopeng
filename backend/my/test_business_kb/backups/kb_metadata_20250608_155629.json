@@ -16,6 +16,13 @@
         }
       }
     },
+    "test_business": {
+      "name": "测试业务",
+      "description": "这是一个测试业务知识库",
+      "created_at": "2025-06-08T15:56:28.179837",
+      "updated_at": "2025-06-08T15:56:28.327747",
+      "documents": {}
+    },
     "intelligen_chassis": {
       "name": "intelligen_chassis",
       "description": "intelligen_chassis",
@@ -27,7 +34,7 @@
           "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\海外三方地图分享地址到车.docx",
           "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\intelligen_chassis\\documents\\7b9adf48-3714-4d72-9fd4-9cc0e458a66d_海外三方地图分享地址到车.docx",
           "added_at": "2025-06-08T15:17:22.239231",
-          "status": "deleted",
+          "status": "active",
           "file_fingerprint": null
         }
       }

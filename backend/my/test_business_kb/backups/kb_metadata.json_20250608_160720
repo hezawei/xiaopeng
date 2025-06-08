@@ -31,6 +31,30 @@
           "file_fingerprint": null
         }
       }
+    },
+    "test_business": {
+      "name": "测试业务",
+      "description": "这是一个测试业务知识库",
+      "created_at": "2025-06-08T16:07:18.092495",
+      "updated_at": "2025-06-08T16:07:19.182741",
+      "documents": {
+        "0bae98ee-b566-4c59-91f9-570636594229": {
+          "file_name": "test_sample_1.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\test_sample_1.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\0bae98ee-b566-4c59-91f9-570636594229_test_sample_1.txt",
+          "added_at": "2025-06-08T16:07:18.108373",
+          "file_fingerprint": "076be55bc10fb959c22c7bd00401f4b7",
+          "status": "active"
+        },
+        "79b30b38-f00a-45be-bc75-cf37ccdfe760": {
+          "file_name": "test_sample_2.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\test_sample_2.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\79b30b38-f00a-45be-bc75-cf37ccdfe760_test_sample_2.txt",
+          "added_at": "2025-06-08T16:07:18.120692",
+          "file_fingerprint": "89b8998b68ab7067b2b4ad4c099c8a5c",
+          "status": "active"
+        }
+      }
     }
   }
 }

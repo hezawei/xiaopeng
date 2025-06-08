@@ -31,6 +31,22 @@
           "file_fingerprint": null
         }
       }
+    },
+    "test_business": {
+      "name": "测试业务",
+      "description": "这是一个测试业务知识库",
+      "created_at": "2025-06-08T16:04:40.439050",
+      "updated_at": "2025-06-08T16:04:40.648542",
+      "documents": {
+        "bb788d28-67be-4888-9ef9-b4bcd733a195": {
+          "file_name": "test_sample.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_sample.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\bb788d28-67be-4888-9ef9-b4bcd733a195_test_sample.txt",
+          "added_at": "2025-06-08T16:04:40.444049",
+          "file_fingerprint": "56da5e7eabd3851e14dd3acc1e270efc",
+          "status": "active"
+        }
+      }
     }
   }
 }

@@ -1,0 +1,68 @@
+{
+  "businesses": {
+    "intelligent_chassis": {
+      "name": "intelligent_chassis",
+      "description": "intelligent_chassis",
+      "created_at": "2025-06-08T15:20:58.607815",
+      "updated_at": "2025-06-08T15:21:45.934841",
+      "documents": {
+        "9749553d-22a5-40ad-9f7a-8308fa5d63ba": {
+          "file_name": "海外三方地图分享地址到车.docx",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\海外三方地图分享地址到车.docx",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\intelligent_chassis\\documents\\9749553d-22a5-40ad-9f7a-8308fa5d63ba_海外三方地图分享地址到车.docx",
+          "added_at": "2025-06-08T15:21:44.697581",
+          "status": "active",
+          "file_fingerprint": "47e00447b7a031bdbfee0e559bcd0c53"
+        }
+      }
+    },
+    "intelligen_chassis": {
+      "name": "intelligen_chassis",
+      "description": "intelligen_chassis",
+      "created_at": "2025-06-08T15:16:53.579723",
+      "updated_at": "2025-06-08T15:17:24.613031",
+      "documents": {
+        "7b9adf48-3714-4d72-9fd4-9cc0e458a66d": {
+          "file_name": "海外三方地图分享地址到车.docx",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\海外三方地图分享地址到车.docx",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\intelligen_chassis\\documents\\7b9adf48-3714-4d72-9fd4-9cc0e458a66d_海外三方地图分享地址到车.docx",
+          "added_at": "2025-06-08T15:17:22.239231",
+          "status": "deleted",
+          "file_fingerprint": null
+        }
+      }
+    },
+    "test_business": {
+      "name": "测试业务",
+      "description": "这是一个测试业务知识库",
+      "created_at": "2025-06-08T16:15:07.202444",
+      "updated_at": "2025-06-08T16:15:08.284914",
+      "documents": {
+        "368a7997-52bd-491b-ae4a-0d93e5cfa118": {
+          "file_name": "test_sample_0.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\test_sample_0.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\368a7997-52bd-491b-ae4a-0d93e5cfa118_test_sample_0.txt",
+          "added_at": "2025-06-08T16:15:07.218077",
+          "file_fingerprint": "42dd521f74c94774053c0a5d951cde84",
+          "status": "active"
+        },
+        "f041b6ee-f8fc-4c25-99be-db31b26c88fb": {
+          "file_name": "test_sample_1.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\test_sample_1.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\f041b6ee-f8fc-4c25-99be-db31b26c88fb_test_sample_1.txt",
+          "added_at": "2025-06-08T16:15:07.224618",
+          "file_fingerprint": "076be55bc10fb959c22c7bd00401f4b7",
+          "status": "active"
+        },
+        "ce603d71-4f44-4590-893d-448166fffa81": {
+          "file_name": "test_sample_2.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\test_sample_2.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\test_business\\documents\\ce603d71-4f44-4590-893d-448166fffa81_test_sample_2.txt",
+          "added_at": "2025-06-08T16:15:07.228617",
+          "file_fingerprint": "89b8998b68ab7067b2b4ad4c099c8a5c",
+          "status": "active"
+        }
+      }
+    }
+  }
+}
