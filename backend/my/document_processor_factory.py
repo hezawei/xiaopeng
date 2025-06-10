@@ -31,7 +31,7 @@ class DocumentProcessorFactory:
         创建统一的文档处理器
         
         Args:
-            config: 配置字典，包含embedding、llm和multimodal的配置
+            config: 配置字典，包含embedding和llm的配置
             
         Returns:
             UnifiedDocumentProcessor实例
@@ -47,27 +47,17 @@ class DocumentProcessorFactory:
             },
             "llm": {
                 "use_deepseek": True
-            },
-            "multimodal": {
-                "api_base": "https://api.moonshot.cn/v1",
-                "model": "moonshot-v1-32k-vision-preview",
-                "max_concurrent": 4
             }
         }
         
         # 合并配置
         embedding_config = {**default_config["embedding"], **(config.get("embedding", {}))}
         llm_config = {**default_config["llm"], **(config.get("llm", {}))}
-        multimodal_config = {**default_config["multimodal"], **(config.get("multimodal", {}))}
         
         try:
             # 创建图片处理器
             from my.document_image_processor import DocumentImageProcessor
-            image_processor = DocumentImageProcessor(
-                api_base=multimodal_config["api_base"],
-                multimodal_model=multimodal_config["model"],
-                max_concurrent_requests=multimodal_config["max_concurrent"]
-            )
+            image_processor = DocumentImageProcessor()
             
             # 创建LlamaIndex处理器
             from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
@@ -114,27 +104,20 @@ class UnifiedDocumentProcessor:
         self.temp_dir = script_dir / "temp_processed_docs"
         self.temp_dir.mkdir(exist_ok=True, parents=True)
     
-    # 重命名为process_and_query以保持一致性
-    async def process_and_query(
+    async def process_document(
         self, 
-        file_path: str, 
-        query: str,
-        chunk_method: str = "sentence",
-        use_existing_index: bool = False,
-        top_k: int = 5
+        file_path: str,
+        chunk_method: str = "sentence"
     ) -> Dict[str, Any]:
         """
-        处理文档并执行查询的统一入口
+        处理文档，返回处理结果
         
         Args:
             file_path: 文档路径
-            query: 查询文本
             chunk_method: 分块方法
-            use_existing_index: 是否使用现有索引
-            top_k: 返回的最相关结果数量
         
         Returns:
-            查询结果
+            处理结果，包含文档内容、节点和索引
         """
         print(f"开始处理文档: {file_path}")
         
@@ -173,28 +156,95 @@ class UnifiedDocumentProcessor:
             # 创建索引
             index = self.llamaindex_processor.create_index(nodes)
             
-            # 执行查询
-            result = self.llamaindex_processor.query_index(index, query, top_k)
-            
-            # 在结果中添加处理信息
-            result["processed_with_image_handler"] = True
-            result["original_file"] = file_path
-            
-            return result
+            return {
+                "processed_text": processed_text,
+                "documents": documents,
+                "nodes": nodes,
+                "index": index,
+                "processed_with_image_handler": True,
+                "original_file": file_path
+            }
         else:
             # 文档不包含图片，直接使用LlamaIndex处理器
             print("文档不包含图片，直接使用LlamaIndex处理器...")
-            result = self.llamaindex_processor.process_and_query(
-                file_path=file_path,
-                query=query,
-                chunk_method=chunk_method,
-                use_existing_index=use_existing_index,
-                top_k=top_k
-            )
             
-            result["processed_with_image_handler"] = False
+            # 加载文档
+            documents = self.llamaindex_processor.load_document(file_path)
             
-            return result
+            # 分块处理
+            nodes = self.llamaindex_processor.chunk_document(documents, chunk_method)
+            
+            # 创建索引
+            index = self.llamaindex_processor.create_index(nodes)
+            
+            # 获取文档文本
+            processed_text = "\n\n".join([doc.text for doc in documents])
+            
+            return {
+                "processed_text": processed_text,
+                "documents": documents,
+                "nodes": nodes,
+                "index": index,
+                "processed_with_image_handler": False,
+                "original_file": file_path
+            }
+    
+    def query_index(
+        self, 
+        index_or_result: Union[Dict[str, Any], Any],
+        query: str,
+        top_k: int = 5
+    ) -> Dict[str, Any]:
+        """
+        查询索引
+        
+        Args:
+            index_or_result: 索引对象或包含索引的处理结果
+            query: 查询文本
+            top_k: 返回的最相关结果数量
+        
+        Returns:
+            查询结果
+        """
+        # 从处理结果中提取索引（如果传入的是处理结果）
+        index = index_or_result.get("index") if isinstance(index_or_result, dict) else index_or_result
+        
+        # 执行查询
+        result = self.llamaindex_processor.query_index(index, query, top_k)
+        
+        return result
+    
+    async def process_and_query(
+        self, 
+        file_path: str, 
+        query: str,
+        chunk_method: str = "sentence",
+        use_existing_index: bool = False,
+        top_k: int = 5
+    ) -> Dict[str, Any]:
+        """
+        处理文档并执行查询（兼容旧接口）
+        
+        Args:
+            file_path: 文档路径
+            query: 查询文本
+            chunk_method: 分块方法
+            use_existing_index: 是否使用现有索引
+            top_k: 返回的最相关结果数量
+        
+        Returns:
+            查询结果
+        """
+        # 处理文档
+        process_result = await self.process_document(file_path, chunk_method)
+        
+        # 查询索引
+        query_result = self.query_index(process_result["index"], query, top_k)
+        
+        # 合并结果
+        result = {**process_result, **query_result}
+        
+        return result
     
     async def _check_document_has_images(self, file_path: str) -> bool:
         """
@@ -231,6 +281,16 @@ class UnifiedDocumentProcessor:
             print(f"检查文档图片时出错: {str(e)}")
             # 出错时保守返回False
             return False
+
+
+
+
+
+
+
+
+
+
 
 
 

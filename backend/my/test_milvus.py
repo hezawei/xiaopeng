@@ -3,8 +3,8 @@ import numpy as np
 import time
 
 # 连接到Docker中运行的Milvus服务
-client = MilvusClient(uri="http://localhost:19530")
-print(f"已连接到Milvus服务: http://localhost:19530")
+client = MilvusClient(uri="http://10.193.200.230:19530")
+print(f"已连接到Milvus服务: 10.193.200.230:19530")
 
 # 列出所有集合
 collections = client.list_collections()
@@ -126,36 +126,6 @@ try:
 except Exception as e:
     print(f"搜索失败: {str(e)}")
 
-# 执行混合搜索测试
-print("\n执行混合搜索测试...")
-try:
-    # 检查是否支持混合搜索
-    import inspect
-    hybrid_search_params = inspect.signature(client.hybrid_search).parameters
-    
-    if 'reqs' in hybrid_search_params and 'ranker' in hybrid_search_params:
-        # 新版API支持混合搜索
-        hybrid_results = client.hybrid_search(
-            collection_name=collection_name,
-            reqs=[{
-                "data": [search_vector],
-                "field": "vector",
-                "params": {"metric_type": "L2", "params": {"nprobe": 10}},
-                "limit": 5
-            }],
-            ranker={"name": "BM25"},
-            output_fields=["text"]
-        )
-        print("混合搜索结果:", hybrid_results)
-    else:
-        print("当前Milvus客户端版本不支持混合搜索的reqs/ranker参数格式")
-        print("跳过混合搜索测试")
-except Exception as e:
-    if "dict" in str(e) and "data" in str(e):
-        print("混合搜索API参数格式不匹配，可能需要更新客户端或服务器版本")
-    else:
-        print(f"混合搜索不可用或出错: {str(e)}")
-    print("跳过混合搜索测试")
 
 # 清理资源
 print(f"\n删除测试集合: {collection_name}")

@@ -80,52 +80,33 @@ class BusinessKnowledgeBaseManager:
     
     def __init__(
         self,
-        base_dir: str = None,
         embedding_model_name: str = "BAAI/bge-small-zh-v1.5",
-        milvus_uri: str = "tcp://localhost:19530",  # 修改为tcp协议
-        chunk_size: int = 512,
-        chunk_overlap: int = 50,
-        auto_sync: bool = False,
-        max_retry_attempts: int = 3,
-        retry_delay: int = 2
+        milvus_uri: str = "tcp://localhost:19530",
+        auto_sync: bool = False
     ):
         """
         初始化业务知识库管理器
         
         Args:
-            base_dir: 知识库基础目录
             embedding_model_name: 嵌入模型名称
             milvus_uri: Milvus服务URI，默认使用本地Docker部署的Milvus
-            chunk_size: 文档分块大小
-            chunk_overlap: 文档分块重叠大小
             auto_sync: 是否在初始化时自动同步数据
-            max_retry_attempts: 最大重试次数
-            retry_delay: 重试延迟（秒）
         """
         # 获取脚本所在目录的绝对路径
         script_dir = Path(__file__).parent.absolute()
-        
-        # 如果没有提供base_dir，则使用脚本所在目录下的business_knowledge_base目录
-        if base_dir is None:
-            self.base_dir = script_dir / "business_knowledge_base"
-        else:
-            # 如果提供的是相对路径，则相对于脚本目录
-            base_path = Path(base_dir)
-            if not base_path.is_absolute():
-                self.base_dir = script_dir / base_path
-            else:
-                self.base_dir = base_path
-        
+        # 直接定义基础目录为脚本所在目录下的business_knowledge_base目录
+        self.base_dir = script_dir / "business_knowledge_base"
         self.base_dir.mkdir(exist_ok=True, parents=True)
         
         # 设置Milvus URI
         self.milvus_uri = milvus_uri
         logger.info(f"连接到Milvus服务: {self.milvus_uri}")
         
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-        self.max_retry_attempts = max_retry_attempts
-        self.retry_delay = retry_delay
+        # 固定文档分块参数
+        self.chunk_size = 512
+        self.chunk_overlap = 50
+        self.max_retry_attempts = 3
+        self.retry_delay = 2
         
         # 设置嵌入模型
         self.embedding_model_name = embedding_model_name
@@ -136,7 +117,7 @@ class BusinessKnowledgeBaseManager:
         self.doc_converter = DocumentConverter()
         
         # 多模态处理器
-        self.image_processor = self._setup_image_processor()
+        self.image_processor = DocumentImageProcessor()
         
         # 业务知识库元数据
         self.metadata_file = self.base_dir / "kb_metadata.json"
@@ -155,31 +136,6 @@ class BusinessKnowledgeBaseManager:
         
         logger.info(f"业务知识库管理器初始化完成，基础目录: {self.base_dir}")
     
-    def _setup_image_processor(self) -> Optional[DocumentImageProcessor]:
-        """设置图像处理器"""
-        try:
-            # 这里可以从环境变量或配置文件中读取API密钥
-            api_keys = [
-                "sk-FefbDs44DxjdtEeQMBpWDe1WZtAFHsle55dSnTUuGv50uUXx",
-                "sk-dVPXuV51GCEMFOOnOqQeZotbfZEZjjfxkoeFSXgpGFgjGySg",
-                "sk-u0hQz4udGiB92w8MrOQPra0ygcknMMcMxNZbVA3c8TjHVA1n",
-                "sk-6rcTKDTON9y0FVM4Dy6eHQHFAqdIyJaD5X8ZgrUNzYP8z0zC",
-                "sk-dYB0ZVpD7mstEcvbR97jwuKqAEgZEsvY45qR8cPVruoX7XA1"
-            ]
-            
-            # 使用基础目录下的temp_images目录作为临时目录
-            temp_images_dir = str(self.base_dir / "temp_images")
-            
-            return DocumentImageProcessor(
-                api_keys=api_keys,
-                api_base="https://api.moonshot.cn/v1",
-                multimodal_model="moonshot-v1-32k-vision-preview",
-                max_concurrent_requests=1,
-                temp_dir=temp_images_dir
-            )
-        except Exception as e:
-            logger.warning(f"图像处理器初始化失败: {str(e)}")
-            return None
     
     def _load_metadata(self) -> Dict[str, Any]:
         """加载知识库元数据"""
@@ -188,9 +144,9 @@ class BusinessKnowledgeBaseManager:
                 with open(self.metadata_file, 'r', encoding='utf-8') as f:
                     metadata = json.load(f)
                 
-                # 兼容旧版本元数据
-                if "businesses" not in metadata:
-                    metadata = {"businesses": metadata}
+                # # 兼容旧版本元数据
+                # if "businesses" not in metadata:
+                #     metadata = {"businesses": metadata}
                 
                 # 确保每个文档都有状态字段
                 for business_id, business_info in metadata["businesses"].items():
@@ -408,8 +364,7 @@ class BusinessKnowledgeBaseManager:
         self,
         business_id: str,
         name: Optional[str] = None,
-        description: str = "",
-        overwrite: bool = False
+        description: str = ""
     ) -> bool:
         """
         创建业务知识库
@@ -418,23 +373,18 @@ class BusinessKnowledgeBaseManager:
             business_id: 业务ID，用作知识库唯一标识
             name: 业务名称，如果为None则使用business_id
             description: 业务描述
-            overwrite: 是否覆盖已存在的同名知识库
             
         Returns:
             创建是否成功
         """
         with self.sync_lock:
             # 检查业务ID是否已存在
-            if business_id in self.kb_metadata["businesses"] and not overwrite:
+            if business_id in self.kb_metadata["businesses"]:
                 logger.warning(f"业务知识库 '{business_id}' 已存在")
                 return False
             
             # 创建业务目录
             business_dir = self.base_dir / business_id
-            if business_dir.exists() and overwrite:
-                # 备份后删除
-                self._backup_file(business_dir)
-                shutil.rmtree(business_dir)
             business_dir.mkdir(exist_ok=True, parents=True)
             
             # 创建子目录
@@ -499,8 +449,7 @@ class BusinessKnowledgeBaseManager:
     async def add_documents_to_kb(
         self,
         business_id: str,
-        file_paths: List[str],
-        process_images: bool = True
+        file_paths: List[str]
     ) -> List[str]:
         """
         添加文档到业务知识库
@@ -508,7 +457,6 @@ class BusinessKnowledgeBaseManager:
         Args:
             business_id: 业务ID
             file_paths: 文档路径列表
-            process_images: 是否处理文档中的图片
             
         Returns:
             添加的文档ID列表
@@ -516,6 +464,9 @@ class BusinessKnowledgeBaseManager:
         if business_id not in self.kb_metadata["businesses"]:
             logger.error(f"业务知识库 '{business_id}' 不存在")
             return []
+        
+        # 始终处理图片
+        process_images = True
         
         business_dir = self.base_dir / business_id
         documents_dir = business_dir / "documents"
@@ -579,13 +530,12 @@ class BusinessKnowledgeBaseManager:
         
         return document_ids
     
-    async def _process_document(self, file_path: str, process_images: bool = True) -> str:
+    async def _process_document(self, file_path: str) -> str:
         """
         处理文档，提取文本内容
         
         Args:
             file_path: 文档路径
-            process_images: 是否处理文档中的图片
             
         Returns:
             处理后的文档内容
@@ -607,8 +557,8 @@ class BusinessKnowledgeBaseManager:
                 # 转换文档
                 result = self.doc_converter.convert(file_path)
                 
-                # 如果需要处理图片且图像处理器可用
-                if process_images and self.image_processor and result.document.images:
+                # 始终处理图片（如果图像处理器可用）
+                if self.image_processor and result.document.images:
                     logger.info(f"文档包含 {len(result.document.images)} 张图片，开始处理...")
                     
                     # 处理图片
@@ -879,9 +829,7 @@ class BusinessKnowledgeBaseManager:
     def query_business_kb(
         self,
         business_id: str,
-        query: str,
-        similarity_top_k: int = 3,
-        response_mode: str = "compact"
+        query: str
     ) -> Dict[str, Any]:
         """
         查询业务知识库
@@ -889,13 +837,15 @@ class BusinessKnowledgeBaseManager:
         Args:
             business_id: 业务ID
             query: 查询文本
-            similarity_top_k: 返回的相似文档数量
-            response_mode: 响应模式，可选值: compact, tree_summarize, refine
         
         Returns:
             查询结果，包含回答和相关文档节点
         """
         try:
+            # 固定参数
+            similarity_top_k = 3
+            response_mode = "compact"
+            
             # 检查业务是否存在
             if business_id not in self.kb_metadata["businesses"]:
                 raise ValueError(f"业务 '{business_id}' 不存在")
@@ -1360,18 +1310,22 @@ async def test_business_kb():
     
     # 创建知识库管理器，使用脚本目录下的test_business_kb目录
     kb_manager = BusinessKnowledgeBaseManager(
-        base_dir=script_dir / "test_business_kb",
-        milvus_uri="http://localhost:19530"  # 使用本地Docker部署的Milvus
+        milvus_uri="http://10.193.200.230:19530"  # 使用本地Docker部署的Milvus
     )
     
     # 测试创建业务知识库
     business_id = "test_business"
+    
+    # 如果业务已存在，先删除
+    if business_id in kb_manager.kb_metadata["businesses"]:
+        print(f"删除已存在的业务 '{business_id}'")
+        kb_manager.delete_business_kb(business_id)
+    
     print(f"\n1. 创建业务知识库 '{business_id}'")
     success = kb_manager.create_business_kb(
         business_id=business_id,
         name="测试业务",
-        description="这是一个测试业务知识库",
-        overwrite=True
+        description="这是一个测试业务知识库"
     )
     print(f"创建结果: {'成功' if success else '失败'}")
     
@@ -1459,6 +1413,24 @@ async def test_business_kb():
 if __name__ == "__main__":
     # 运行测试
     asyncio.run(test_business_kb())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

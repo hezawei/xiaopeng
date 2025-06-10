@@ -47,53 +47,31 @@ class DocumentImageProcessor:
     4. 输出包含图片描述的纯文本结果或Markdown文本
     """
     
-    def __init__(
-        self,
-        api_keys: List[str] = None,
-        api_base: str = "https://api.moonshot.cn/v1",
-        multimodal_model: str = "moonshot-v1-32k-vision-preview",
-        max_concurrent_requests: int = 4,
-        temp_dir: str = None
-    ):
+    def __init__(self):
         """
         初始化文档图片处理器
-        
-        Args:
-            api_keys: API密钥列表，用于轮换调用
-            api_base: API基础URL
-            multimodal_model: 多模态模型名称
-            max_concurrent_requests: 最大并发请求数
-            temp_dir: 临时图片存储目录
         """
-        # 默认API密钥列表
-        if api_keys is None:
-            self.api_keys = [
-                "sk-fCgBeG8ETu8MMCIaAmdOI4JpOKKagF7qXNIE4kIhu2q8zEU3",
-                "sk-n9Kb2lFGyV3LJ0GEwg3NBjy5ZrJk3qTlNJJt4Kfkro7T8Fct",
-                "sk-GwCmhwrrhicbkbishgUhYmVg6IrAJkg4mwWPNIMpdkQBe8tr",
-                "sk-3vO3Ku08wFZBRREAWGxPWKYtEcUE8pZ1ResjWOa0RvBLz2aM",
-            ]
-        else:
-            self.api_keys = api_keys if isinstance(api_keys, list) else [api_keys]
+        # 直接定义API密钥列表
+        self.api_keys = [
+            "sk-fCgBeG8ETu8MMCIaAmdOI4JpOKKagF7qXNIE4kIhu2q8zEU3",
+            "sk-n9Kb2lFGyV3LJ0GEwg3NBjy5ZrJk3qTlNJJt4Kfkro7T8Fct",
+            "sk-GwCmhwrrhicbkbishgUhYmVg6IrAJkg4mwWPNIMpdkQBe8tr",
+            "sk-3vO3Ku08wFZBRREAWGxPWKYtEcUE8pZ1ResjWOa0RvBLz2aM",
+        ]
             
-        self.api_base = api_base
-        self.multimodal_model = multimodal_model
-        self.max_concurrent_requests = min(max_concurrent_requests, len(self.api_keys))
+        # 直接定义API基础URL和模型名称
+        self.api_base = "https://api.moonshot.cn/v1"
+        self.multimodal_model = "moonshot-v1-32k-vision-preview"
+        
+        # 确保并发数不超过API密钥数量
+        self.max_concurrent_requests = len(self.api_keys)
         
         # 获取脚本所在目录的绝对路径
         from pathlib import Path
         script_dir = Path(__file__).parent.absolute()
         
-        # 设置临时目录
-        if temp_dir is None:
-            self.temp_image_dir = str(script_dir / "temp_images")
-        else:
-            # 如果提供的是相对路径，则相对于脚本目录
-            temp_path = Path(temp_dir)
-            if not temp_path.is_absolute():
-                self.temp_image_dir = str(script_dir / temp_path)
-            else:
-                self.temp_image_dir = str(temp_path)
+        # 直接定义临时目录为脚本目录下的temp_images
+        self.temp_image_dir = str(script_dir / "temp_images")
         
         # 确保临时目录存在
         os.makedirs(self.temp_image_dir, exist_ok=True)
@@ -579,6 +557,10 @@ if __name__ == "__main__":
 
     # 运行异步主函数
     asyncio.run(main())
+
+
+
+
 
 
 

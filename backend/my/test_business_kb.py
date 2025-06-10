@@ -89,13 +89,17 @@ class BusinessKBTester:
         """
         print("\n=== 运行基本测试流程 ===")
         
+        # 确保测试业务不存在
+        if business_id in self.kb_manager.kb_metadata["businesses"]:
+            print(f"删除已存在的测试业务 '{business_id}'")
+            self.kb_manager.delete_business_kb(business_id)
+        
         # 1. 创建业务知识库
         print(f"\n1. 创建业务知识库 '{business_id}'")
         success = self.kb_manager.create_business_kb(
             business_id=business_id,
             name="测试业务",
-            description="这是一个测试业务知识库",
-            overwrite=True
+            description="这是一个测试业务知识库"
         )
         print(f"创建结果: {'成功' if success else '失败'}")
         
@@ -169,7 +173,6 @@ class BusinessKBTester:
             business_id=business_id,
             name="同步测试业务",
             description="用于测试同步机制的业务知识库",
-            overwrite=True
         )
         print(f"创建结果: {'成功' if success else '失败'}")
         
@@ -319,7 +322,6 @@ class BusinessKBTester:
             business_id=business_id,
             name="性能测试业务",
             description="用于性能测试的业务知识库",
-            overwrite=True
         )
         create_time = time.time() - start_time
         print(f"创建结果: {'成功' if success else '失败'}, 耗时: {create_time:.2f}秒")
@@ -459,4 +461,6 @@ if __name__ == "__main__":
     
     # 运行主函数
     asyncio.run(main())
+
+
 

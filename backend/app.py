@@ -102,51 +102,6 @@ async def upload_files(files: List[UploadFile] = File(...)):
     
     return {"status": "success", "files": result}
 
-# 文档分析HTTP接口
-@app.post("/api/analyze", response_model=AnalysisResponse)
-async def analyze_document(request: AnalysisRequest):
-    try:
-        # 初始化文档处理器
-        processor = LlamaIndexDocumentProcessor(
-            embedding_model_type="huggingface",
-            embedding_model_name="BAAI/bge-small-zh-v1.5",
-            use_deepseek_llm=True
-        )
-        
-        # 获取文件路径
-        file_paths = []
-        for file_id in request.file_ids:
-            # 查找匹配的文件
-            for filename in os.listdir(UPLOAD_DIR):
-                if filename.startswith(file_id):
-                    file_paths.append(os.path.join(UPLOAD_DIR, filename))
-                    break
-        
-        if not file_paths:
-            return AnalysisResponse(
-                status="error",
-                message="未找到指定的文件"
-            )
-        
-        # 处理文档并执行查询
-        result = await processor.process_and_query(
-            file_path=file_paths[0],  # 目前只处理第一个文件
-            query=request.query,
-            chunk_method="sentence"
-        )
-        
-        return AnalysisResponse(
-            status="success",
-            message="分析完成",
-            result=result
-        )
-        
-    except Exception as e:
-        return AnalysisResponse(
-            status="error",
-            message=f"分析过程中出错: {str(e)}"
-        )
-
 # WebSocket接口 - 实时文档分析
 @app.websocket("/ws/analyze/{client_id}")
 async def websocket_analyze(websocket: WebSocket, client_id: str):
@@ -190,11 +145,6 @@ async def websocket_analyze(websocket: WebSocket, client_id: str):
             },
             "llm": {
                 "use_deepseek": True
-            },
-            "multimodal": {
-                "api_base": "https://api.moonshot.cn/v1",
-                "model": "moonshot-v1-32k-vision-preview",
-                "max_concurrent": 4
             }
         })
         
@@ -220,24 +170,29 @@ async def websocket_analyze(websocket: WebSocket, client_id: str):
             "message": "正在处理文档，这可能需要一些时间..."
         }))
         
-        # 处理文档并执行查询
-        result = await processor.process_and_query(
+        # 处理文档
+        process_result = await processor.process_document(
             file_path=file_paths[0],  # 目前只处理第一个文件
-            query=data.get("query", "分析这个文档的主要需求和功能点"),
             chunk_method="sentence"
+        )
+        
+        # 执行查询
+        query_result = processor.query_index(
+            process_result,
+            query=data.get("query", "分析这个文档的主要需求和功能点")
         )
 
         # 打印相关文本块到终端
         print("\n===== 相关文本块 =====")
-        for i, node in enumerate(result.get("source_nodes", [])):
+        for i, node in enumerate(query_result.get("source_nodes", [])):
             print(f"\n--- 文本块 {i+1} (相关度: {node.get('score', 0):.4f}) ---")
             print(node.get("text", ""))
         print("=====================\n")
 
         # 只发送回答部分给前端
         frontend_result = {
-            "query": result.get("query", ""),
-            "response": result.get("response", "")
+            "query": query_result.get("query", ""),
+            "response": query_result.get("response", "")
             # 不包含source_nodes
         }
 
@@ -336,6 +291,11 @@ async def delete_files(request: Dict[str, Any]):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
+
+
 
 
 
