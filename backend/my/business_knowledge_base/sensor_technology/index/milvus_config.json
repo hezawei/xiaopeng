@@ -1,0 +1,9 @@
+{
+  "collection_name": "business_sensor_technology",
+  "uri": "tcp://localhost:19530",
+  "dim": 512,
+  "created_at": "2025-06-16T00:56:40.437601",
+  "node_count": 2,
+  "primary_field": "pk_id",
+  "vector_field": "vector"
+}

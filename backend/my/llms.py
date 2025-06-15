@@ -15,18 +15,3 @@ model_client = OpenAIChatCompletionClient(
     # 设置较小的最大token数，防止超出模型限制
     max_tokens=1000
 )
-
-# 可选的第二个模型客户端
-model_client2 = OpenAIChatCompletionClient(
-    model="deepseek-chat",  # 可以替换为其他模型
-    api_key="sk-cdb5b06b8ebd4a44a546371052d72f96",  # 请替换为你的API密钥
-    base_url="https://api.deepseek.com/v1",  # 可以替换为其他API端点
-    model_info={
-        "function_calling": True,
-        "json_output": True,
-        "vision": False,
-        "family": ModelFamily.R1,
-    },
-    # 设置较小的最大token数，防止超出模型限制
-    max_tokens=1000
-)

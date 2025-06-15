@@ -1,0 +1,11 @@
+{
+  "businesses": {
+    "cross_test_business_3": {
+      "name": "测试业务3",
+      "description": "这是跨业务测试用的业务知识库3",
+      "created_at": "2025-06-14T18:25:48.957880",
+      "updated_at": "2025-06-14T18:25:48.957880",
+      "documents": {}
+    }
+  }
+}

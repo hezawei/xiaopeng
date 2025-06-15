@@ -1,0 +1,385 @@
+{
+  "version": "2.0",
+  "business_entities": {
+    "intelligent_chassis": [
+      "智能底盘是现",
+      "系统",
+      "电子稳定控制系统",
+      "机械电子一体",
+      "实时控制算法",
+      "根据路况自动",
+      "化设计等",
+      "制动能量回收系统",
+      "自适应阻尼控制",
+      "机械电子一体化设",
+      "进技术",
+      "集成了多种先",
+      "根据路况自动调节",
+      "控性",
+      "传感器融合",
+      "提供更好的乘坐舒",
+      "关键技术包括传感",
+      "线控转向系统",
+      "智能底盘技术概述",
+      "自适应阻尼控",
+      "关键技术包括传感器融合",
+      "车的重要组成部分",
+      "确保车辆在各种路",
+      "向控制",
+      "智能底盘是现代汽",
+      "主动悬挂系统",
+      "提供精确的转向控",
+      "集成了多种先进技",
+      "代汽车的重要",
+      "种路况下的稳",
+      "提高能源利用效率",
+      "效率",
+      "关键技术包括传感器融合 实时控制算法",
+      "概述"
+    ],
+    "autonomous_driving": [
+      "提供厘米级的",
+      "自动驾驶技术是未",
+      "车联网通信",
+      "复杂场景理解",
+      "具体的车辆控",
+      "主要包括",
+      "车与基础设施的通",
+      "基于感知信息进行",
+      "和行为决策",
+      "使用激光雷达",
+      "自动驾驶技术",
+      "提供厘米级的道路",
+      "来交通的发展方向",
+      "的通信",
+      "毫米波雷达等",
+      "环境感知",
+      "路径规划和行为决",
+      "法规标准等",
+      "的车辆控制指令",
+      "安全性保障",
+      "技术挑战包括复杂",
+      "实现车与车",
+      "将决策转化为具体",
+      "毫米波雷达等传感",
+      "是未来交通的",
+      "自动驾驶技术基础",
+      "高精度地图"
+    ],
+    "sensor_technology": [
+      "激光雷达",
+      "识别交通标志",
+      "确性和可靠性",
+      "传感器融合技术将",
+      "提供车辆运动",
+      "提供车辆运动状态",
+      "imu惯性测量单元",
+      "毫米波雷达",
+      "IMU惯性测量单元",
+      "传感器是智能驾驶",
+      "摄像头",
+      "环境信息",
+      "传感器技术在智能",
+      "在恶劣天气下仍能",
+      "器数据结合",
+      "睛和耳朵",
+      "提高感知的准确性",
+      "应用",
+      "imu惯性测量单元 提供车辆运动状态信息",
+      "惯性测量单元",
+      "驾驶中的应用",
+      "超声波传感器",
+      "在恶劣天气下",
+      "提高感知的准",
+      "车道线",
+      "多种传感器数据结",
+      "提供高精度的",
+      "传感器融合技术将多种传感器数据结合",
+      "术将多种传感",
+      "系统的眼睛和耳朵",
+      "用于近距离障碍物"
+    ]
+  },
+  "entity_businesses": {
+    "智能底盘是现": [
+      "intelligent_chassis"
+    ],
+    "机械电子一体": [
+      "intelligent_chassis"
+    ],
+    "概述": [
+      "intelligent_chassis"
+    ],
+    "效率": [
+      "intelligent_chassis"
+    ],
+    "传感器融合": [
+      "intelligent_chassis"
+    ],
+    "种路况下的稳": [
+      "intelligent_chassis"
+    ],
+    "系统": [
+      "intelligent_chassis"
+    ],
+    "化设计等": [
+      "intelligent_chassis"
+    ],
+    "进技术": [
+      "intelligent_chassis"
+    ],
+    "代汽车的重要": [
+      "intelligent_chassis"
+    ],
+    "根据路况自动": [
+      "intelligent_chassis"
+    ],
+    "向控制": [
+      "intelligent_chassis"
+    ],
+    "集成了多种先": [
+      "intelligent_chassis"
+    ],
+    "自适应阻尼控": [
+      "intelligent_chassis"
+    ],
+    "控性": [
+      "intelligent_chassis"
+    ],
+    "具体的车辆控": [
+      "autonomous_driving"
+    ],
+    "实现车与车": [
+      "autonomous_driving"
+    ],
+    "和行为决策": [
+      "autonomous_driving"
+    ],
+    "毫米波雷达等": [
+      "autonomous_driving"
+    ],
+    "是未来交通的": [
+      "autonomous_driving"
+    ],
+    "环境感知": [
+      "autonomous_driving"
+    ],
+    "高精度地图": [
+      "autonomous_driving"
+    ],
+    "安全性保障": [
+      "autonomous_driving"
+    ],
+    "自动驾驶技术": [
+      "autonomous_driving"
+    ],
+    "提供厘米级的": [
+      "autonomous_driving"
+    ],
+    "主要包括": [
+      "autonomous_driving"
+    ],
+    "的通信": [
+      "autonomous_driving"
+    ],
+    "法规标准等": [
+      "autonomous_driving"
+    ],
+    "使用激光雷达": [
+      "autonomous_driving"
+    ],
+    "复杂场景理解": [
+      "autonomous_driving"
+    ],
+    "睛和耳朵": [
+      "sensor_technology"
+    ],
+    "器数据结合": [
+      "sensor_technology"
+    ],
+    "激光雷达": [
+      "sensor_technology"
+    ],
+    "惯性测量单元": [
+      "sensor_technology"
+    ],
+    "车道线": [
+      "sensor_technology"
+    ],
+    "识别交通标志": [
+      "sensor_technology"
+    ],
+    "提供车辆运动": [
+      "sensor_technology"
+    ],
+    "术将多种传感": [
+      "sensor_technology"
+    ],
+    "确性和可靠性": [
+      "sensor_technology"
+    ],
+    "环境信息": [
+      "sensor_technology"
+    ],
+    "应用": [
+      "sensor_technology"
+    ],
+    "提高感知的准": [
+      "sensor_technology"
+    ],
+    "在恶劣天气下": [
+      "sensor_technology"
+    ],
+    "摄像头": [
+      "sensor_technology"
+    ],
+    "超声波传感器": [
+      "sensor_technology"
+    ],
+    "智能底盘技术概述": [
+      "intelligent_chassis"
+    ],
+    "智能底盘是现代汽": [
+      "intelligent_chassis"
+    ],
+    "车的重要组成部分": [
+      "intelligent_chassis"
+    ],
+    "集成了多种先进技": [
+      "intelligent_chassis"
+    ],
+    "提供更好的乘坐舒": [
+      "intelligent_chassis"
+    ],
+    "电子稳定控制系统": [
+      "intelligent_chassis"
+    ],
+    "确保车辆在各种路": [
+      "intelligent_chassis"
+    ],
+    "根据路况自动调节": [
+      "intelligent_chassis"
+    ],
+    "提供精确的转向控": [
+      "intelligent_chassis"
+    ],
+    "制动能量回收系统": [
+      "intelligent_chassis"
+    ],
+    "提高能源利用效率": [
+      "intelligent_chassis"
+    ],
+    "关键技术包括传感": [
+      "intelligent_chassis"
+    ],
+    "机械电子一体化设": [
+      "intelligent_chassis"
+    ],
+    "自适应阻尼控制": [
+      "intelligent_chassis"
+    ],
+    "主动悬挂系统": [
+      "intelligent_chassis"
+    ],
+    "自动驾驶技术基础": [
+      "autonomous_driving"
+    ],
+    "自动驾驶技术是未": [
+      "autonomous_driving"
+    ],
+    "来交通的发展方向": [
+      "autonomous_driving"
+    ],
+    "毫米波雷达等传感": [
+      "autonomous_driving"
+    ],
+    "基于感知信息进行": [
+      "autonomous_driving"
+    ],
+    "路径规划和行为决": [
+      "autonomous_driving"
+    ],
+    "将决策转化为具体": [
+      "autonomous_driving"
+    ],
+    "提供厘米级的道路": [
+      "autonomous_driving"
+    ],
+    "车与基础设施的通": [
+      "autonomous_driving"
+    ],
+    "技术挑战包括复杂": [
+      "autonomous_driving"
+    ],
+    "的车辆控制指令": [
+      "autonomous_driving"
+    ],
+    "车联网通信": [
+      "autonomous_driving"
+    ],
+    "IMU惯性测量单元": [
+      "sensor_technology"
+    ],
+    "传感器技术在智能": [
+      "sensor_technology"
+    ],
+    "传感器是智能驾驶": [
+      "sensor_technology"
+    ],
+    "系统的眼睛和耳朵": [
+      "sensor_technology"
+    ],
+    "在恶劣天气下仍能": [
+      "sensor_technology"
+    ],
+    "用于近距离障碍物": [
+      "sensor_technology"
+    ],
+    "提供车辆运动状态": [
+      "sensor_technology"
+    ],
+    "传感器融合技术将": [
+      "sensor_technology"
+    ],
+    "多种传感器数据结": [
+      "sensor_technology"
+    ],
+    "提高感知的准确性": [
+      "sensor_technology"
+    ],
+    "驾驶中的应用": [
+      "sensor_technology"
+    ],
+    "提供高精度的": [
+      "sensor_technology"
+    ],
+    "实时控制算法": [
+      "intelligent_chassis"
+    ],
+    "关键技术包括传感器融合": [
+      "intelligent_chassis"
+    ],
+    "线控转向系统": [
+      "intelligent_chassis"
+    ],
+    "关键技术包括传感器融合 实时控制算法": [
+      "intelligent_chassis"
+    ],
+    "imu惯性测量单元": [
+      "sensor_technology"
+    ],
+    "imu惯性测量单元 提供车辆运动状态信息": [
+      "sensor_technology"
+    ],
+    "毫米波雷达": [
+      "sensor_technology"
+    ],
+    "传感器融合技术将多种传感器数据结合": [
+      "sensor_technology"
+    ]
+  },
+  "metadata": {
+    "created_at": "",
+    "updated_at": "2025-06-16T00:56:39.224285"
+  }
+}

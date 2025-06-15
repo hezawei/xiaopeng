@@ -1,0 +1,153 @@
+{
+  "businesses": {
+    "intelligent_chassis": {
+      "name": "智能底盘",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.344772",
+      "updated_at": "2025-06-16T00:44:24.774315",
+      "documents": {
+        "53ab92ba-720d-4951-bbc7-962cdcb9a259": {
+          "file_name": "intelligent_chassis_overview.txt",
+          "original_path": "sample_docs\\intelligent_chassis_overview.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\intelligent_chassis\\documents\\intelligent_chassis_overview.txt",
+          "status": "active",
+          "file_fingerprint": "1c130df042494ca10d455e60ddaf2858",
+          "added_at": "2025-06-15T14:25:37.593586",
+          "entities": [
+            "智能底盘是现",
+            "机械电子一体",
+            "概述",
+            "效率",
+            "传感器融合",
+            "种路况下的稳",
+            "系统",
+            "化设计等",
+            "进技术",
+            "代汽车的重要",
+            "根据路况自动",
+            "向控制",
+            "集成了多种先",
+            "自适应阻尼控",
+            "控性"
+          ]
+        },
+        "01e0d504-966f-4c62-9968-63dd200f5957": {
+          "file_name": "intelligent_chassis_overview.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\knowledge_base\\sample_docs\\intelligent_chassis_overview.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\intelligent_chassis\\documents\\intelligent_chassis_overview.txt",
+          "status": "active",
+          "file_fingerprint": "1c130df042494ca10d455e60ddaf2858",
+          "added_at": "2025-06-16T00:44:24.774315",
+          "entities": [
+            "智能底盘技术概述",
+            "智能底盘是现代汽",
+            "车的重要组成部分",
+            "集成了多种先进技",
+            "提供更好的乘坐舒",
+            "电子稳定控制系统",
+            "确保车辆在各种路",
+            "根据路况自动调节",
+            "提供精确的转向控",
+            "制动能量回收系统",
+            "提高能源利用效率",
+            "关键技术包括传感",
+            "机械电子一体化设",
+            "自适应阻尼控制",
+            "主动悬挂系统"
+          ]
+        }
+      }
+    },
+    "autonomous_driving": {
+      "name": "自动驾驶",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.345772",
+      "updated_at": "2025-06-16T00:44:26.814566",
+      "documents": {
+        "facc9d92-dc18-43e5-b69f-7060ae0f1e66": {
+          "file_name": "autonomous_driving_basics.txt",
+          "original_path": "sample_docs\\autonomous_driving_basics.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\autonomous_driving\\documents\\autonomous_driving_basics.txt",
+          "status": "active",
+          "file_fingerprint": "b4f834eb9b7006eadd1a8b8413209318",
+          "added_at": "2025-06-15T14:25:38.827549",
+          "entities": [
+            "具体的车辆控",
+            "实现车与车",
+            "和行为决策",
+            "毫米波雷达等",
+            "是未来交通的",
+            "环境感知",
+            "高精度地图",
+            "安全性保障",
+            "自动驾驶技术",
+            "提供厘米级的",
+            "主要包括",
+            "的通信",
+            "法规标准等",
+            "使用激光雷达",
+            "复杂场景理解"
+          ]
+        },
+        "8e05e57c-32de-4746-837a-1678858cb522": {
+          "file_name": "autonomous_driving_basics.txt",
+          "original_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\knowledge_base\\sample_docs\\autonomous_driving_basics.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\autonomous_driving\\documents\\autonomous_driving_basics.txt",
+          "status": "active",
+          "file_fingerprint": "b4f834eb9b7006eadd1a8b8413209318",
+          "added_at": "2025-06-16T00:44:26.814566",
+          "entities": [
+            "自动驾驶技术基础",
+            "自动驾驶技术是未",
+            "来交通的发展方向",
+            "毫米波雷达等传感",
+            "基于感知信息进行",
+            "路径规划和行为决",
+            "将决策转化为具体",
+            "提供厘米级的道路",
+            "车与基础设施的通",
+            "技术挑战包括复杂",
+            "的车辆控制指令",
+            "使用激光雷达",
+            "高精度地图",
+            "车联网通信",
+            "实现车与车"
+          ]
+        }
+      }
+    },
+    "sensor_technology": {
+      "name": "传感器技术",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.353771",
+      "updated_at": "2025-06-15T14:25:40.043565",
+      "documents": {
+        "b6d2ebc3-d5fb-4d09-9718-a5d98fc3ff80": {
+          "file_name": "sensor_technology.txt",
+          "original_path": "sample_docs\\sensor_technology.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\sensor_technology\\documents\\sensor_technology.txt",
+          "status": "active",
+          "file_fingerprint": "45072124c4d7599318eadbcfabe517e8",
+          "added_at": "2025-06-15T14:25:40.043565",
+          "entities": [
+            "睛和耳朵",
+            "器数据结合",
+            "激光雷达",
+            "惯性测量单元",
+            "车道线",
+            "识别交通标志",
+            "提供车辆运动",
+            "术将多种传感",
+            "确性和可靠性",
+            "环境信息",
+            "应用",
+            "提高感知的准",
+            "在恶劣天气下",
+            "摄像头",
+            "超声波传感器"
+          ]
+        }
+      }
+    }
+  }
+}

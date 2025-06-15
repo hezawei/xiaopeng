@@ -1,0 +1,75 @@
+{
+  "businesses": {
+    "cross_test_business_1": {
+      "name": "测试业务1",
+      "description": "这是跨业务测试用的业务知识库1",
+      "created_at": "2025-06-14T19:37:32.821341",
+      "updated_at": "2025-06-14T19:37:34.836294",
+      "documents": {
+        "96a0deae-0f52-4106-86d3-dd36c5527789": {
+          "file_name": "cross_test_business_1_doc_0.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_1_doc_0.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_1\\documents\\96a0deae-0f52-4106-86d3-dd36c5527789_cross_test_business_1_doc_0.txt",
+          "added_at": "2025-06-14T19:37:32.841344",
+          "file_fingerprint": "6b17364110ee16b7671d4351c88205ec",
+          "status": "active"
+        },
+        "87fa2842-5210-4bdb-8a92-6a8afb6175d4": {
+          "file_name": "cross_test_business_1_doc_1.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_1_doc_1.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_1\\documents\\87fa2842-5210-4bdb-8a92-6a8afb6175d4_cross_test_business_1_doc_1.txt",
+          "added_at": "2025-06-14T19:37:32.845342",
+          "file_fingerprint": "a8e41ad69209df83d6d1ae738b943d13",
+          "status": "active"
+        },
+        "810135d0-d071-49a7-a75d-8fd47edd47c5": {
+          "file_name": "cross_test_business_1_doc_2.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_1_doc_2.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_1\\documents\\810135d0-d071-49a7-a75d-8fd47edd47c5_cross_test_business_1_doc_2.txt",
+          "added_at": "2025-06-14T19:37:32.849341",
+          "file_fingerprint": "70efac1fcc40a7b7ee52c40960ae8745",
+          "status": "active"
+        }
+      }
+    },
+    "cross_test_business_2": {
+      "name": "测试业务2",
+      "description": "这是跨业务测试用的业务知识库2",
+      "created_at": "2025-06-14T19:37:32.822340",
+      "updated_at": "2025-06-14T19:37:36.486400",
+      "documents": {
+        "4eb3b659-1478-4fb5-b133-3cb0c3c98f62": {
+          "file_name": "cross_test_business_2_doc_0.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_2_doc_0.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_2\\documents\\4eb3b659-1478-4fb5-b133-3cb0c3c98f62_cross_test_business_2_doc_0.txt",
+          "added_at": "2025-06-14T19:37:34.839938",
+          "file_fingerprint": "015d9f4e535a5991b6514f048638c9ff",
+          "status": "active"
+        },
+        "e94d6886-faf3-4357-b445-023cde3e6f13": {
+          "file_name": "cross_test_business_2_doc_1.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_2_doc_1.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_2\\documents\\e94d6886-faf3-4357-b445-023cde3e6f13_cross_test_business_2_doc_1.txt",
+          "added_at": "2025-06-14T19:37:34.843080",
+          "file_fingerprint": "a245ceb9d201d5a6af298a73d83ecb8f",
+          "status": "active"
+        },
+        "43245ebc-932f-4773-b80a-ac50a95e39ff": {
+          "file_name": "cross_test_business_2_doc_2.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_2_doc_2.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_2\\documents\\43245ebc-932f-4773-b80a-ac50a95e39ff_cross_test_business_2_doc_2.txt",
+          "added_at": "2025-06-14T19:37:34.845703",
+          "file_fingerprint": "732055ba97b3ef29849bab6ffbe0f321",
+          "status": "active"
+        }
+      }
+    },
+    "cross_test_business_3": {
+      "name": "测试业务3",
+      "description": "这是跨业务测试用的业务知识库3",
+      "created_at": "2025-06-14T19:37:32.830344",
+      "updated_at": "2025-06-14T19:37:32.830344",
+      "documents": {}
+    }
+  }
+}

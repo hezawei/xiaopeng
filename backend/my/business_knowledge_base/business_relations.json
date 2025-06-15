@@ -1,0 +1,39 @@
+{
+  "relations": {
+    "cross_test_business_1": {
+      "cross_test_business_2": {
+        "types": [
+          "related"
+        ],
+        "weight": 6.3,
+        "entities": []
+      },
+      "cross_test_business_3": {
+        "types": [
+          "related"
+        ],
+        "weight": 3.7,
+        "entities": []
+      }
+    },
+    "cross_test_business_2": {
+      "cross_test_business_1": {
+        "types": [
+          "related"
+        ],
+        "weight": 6.3,
+        "entities": []
+      }
+    },
+    "cross_test_business_3": {
+      "cross_test_business_1": {
+        "types": [
+          "related"
+        ],
+        "weight": 3.7,
+        "entities": []
+      }
+    }
+  },
+  "entity_map": {}
+}

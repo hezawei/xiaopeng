@@ -1,0 +1,11 @@
+{
+  "businesses": {
+    "cross_test_business_3": {
+      "name": "跨业务测试 3",
+      "description": "用于测试跨业务查询的业务 3",
+      "created_at": "2025-06-14T20:29:31.801049",
+      "updated_at": "2025-06-14T20:29:36.886376",
+      "documents": {
+        "961de1bb-9307-4d91-8042-15fabb6dc28c": {
+          "file_name": "cross_test_business_3_doc_0.txt",
+          "original_path": 

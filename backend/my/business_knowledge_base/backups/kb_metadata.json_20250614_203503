@@ -1,0 +1,18 @@
+{
+  "businesses": {
+    "cross_test_business_1": {
+      "name": "智能底盘",
+      "description": "测试业务: 智能底盘",
+      "created_at": "2025-06-14T20:35:03.720100",
+      "updated_at": "2025-06-14T20:35:03.720100",
+      "documents": {}
+    },
+    "cross_test_business_2": {
+      "name": "自动驾驶",
+      "description": "测试业务: 自动驾驶",
+      "created_at": "2025-06-14T20:35:03.721100",
+      "updated_at": "2025-06-14T20:35:03.721100",
+      "documents": {}
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "collection_name": "business_cross_test_business_3",
+  "uri": "http://localhost:19530",
+  "dim": 512,
+  "created_at": "2025-06-14T20:45:37.736187",
+  "node_count": 1,
+  "primary_field": "pk_id",
+  "vector_field": "vector"
+}

@@ -18,8 +18,8 @@ from typing import Union, Dict, Any, List, Optional
 import asyncio
 from pathlib import Path  # 确保导入Path类
 
-from my.document_image_processor import DocumentImageProcessor
-from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
+from document_image_processor import DocumentImageProcessor
+from llamaindex_document_processor import LlamaIndexDocumentProcessor
 from llama_index.core import SimpleDirectoryReader, Document
 
 class DocumentProcessorFactory:
@@ -56,11 +56,11 @@ class DocumentProcessorFactory:
         
         try:
             # 创建图片处理器
-            from my.document_image_processor import DocumentImageProcessor
+            from document_image_processor import DocumentImageProcessor
             image_processor = DocumentImageProcessor()
             
             # 创建LlamaIndex处理器
-            from my.llamaindex_document_processor import LlamaIndexDocumentProcessor
+            from llamaindex_document_processor import LlamaIndexDocumentProcessor
             llamaindex_processor = LlamaIndexDocumentProcessor(
                 embedding_model_type=embedding_config["model_type"],
                 embedding_model_name=embedding_config["model_name"],
@@ -281,6 +281,9 @@ class UnifiedDocumentProcessor:
             print(f"检查文档图片时出错: {str(e)}")
             # 出错时保守返回False
             return False
+
+
+
 
 
 

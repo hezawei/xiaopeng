@@ -1,0 +1,9 @@
+{
+  "collection_name": "business_autonomous_driving",
+  "uri": "tcp://localhost:19530",
+  "dim": 512,
+  "created_at": "2025-06-16T00:56:39.184240",
+  "node_count": 1,
+  "primary_field": "pk_id",
+  "vector_field": "vector"
+}

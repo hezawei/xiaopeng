@@ -1,0 +1,52 @@
+{
+  "businesses": {
+    "cross_test_business_1": {
+      "name": "智能底盘",
+      "description": "测试业务: 智能底盘",
+      "created_at": "2025-06-14T20:40:43.944217",
+      "updated_at": "2025-06-14T20:40:45.743566",
+      "documents": {
+        "360a0719-668a-461c-9d5f-41898c849568": {
+          "file_name": "cross_test_business_1_doc.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_1_doc.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_1\\documents\\360a0719-668a-461c-9d5f-41898c849568_cross_test_business_1_doc.txt",
+          "added_at": "2025-06-14T20:40:43.978862",
+          "file_fingerprint": "c961380277353d7ea6a85d3e58ea7c25",
+          "status": "active"
+        }
+      }
+    },
+    "cross_test_business_2": {
+      "name": "自动驾驶",
+      "description": "测试业务: 自动驾驶",
+      "created_at": "2025-06-14T20:40:43.945776",
+      "updated_at": "2025-06-14T20:40:47.143189",
+      "documents": {
+        "6d50d3b0-f651-4a0c-be80-cd2c206aad0b": {
+          "file_name": "cross_test_business_2_doc.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_2_doc.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_2\\documents\\6d50d3b0-f651-4a0c-be80-cd2c206aad0b_cross_test_business_2_doc.txt",
+          "added_at": "2025-06-14T20:40:45.747768",
+          "file_fingerprint": "7bfe9f4d69433d09bdf097b7e2e39e1f",
+          "status": "active"
+        }
+      }
+    },
+    "cross_test_business_3": {
+      "name": "车载信息娱乐",
+      "description": "测试业务: 车载信息娱乐",
+      "created_at": "2025-06-14T20:40:43.965945",
+      "updated_at": "2025-06-14T20:40:48.364644",
+      "documents": {
+        "74c4e67a-e6ee-4150-ad75-ed260eb0874f": {
+          "file_name": "cross_test_business_3_doc.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\74c4e67a-e6ee-4150-ad75-ed260eb0874f_cross_test_business_3_doc.txt",
+          "added_at": "2025-06-14T20:40:47.163033",
+          "file_fingerprint": "4f0c52dc6726809f902adad309fce3b3",
+          "status": "active"
+        }
+      }
+    }
+  }
+}

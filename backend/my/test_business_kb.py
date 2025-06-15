@@ -70,15 +70,55 @@ class BusinessKBTester:
         if auto_sync:
             print("启用自动同步，正在校验知识库一致性...")
         
+        # 修改这里，不传递base_dir参数
         self.kb_manager = BusinessKnowledgeBaseManager(
-            base_dir=self.base_dir,
             milvus_uri=milvus_uri,
-            auto_sync=auto_sync,
-            max_retry_attempts=3,
-            retry_delay=2
+            auto_sync=False  # 不在初始化时自动同步
         )
         
+        # 如果需要同步，手动触发同步
+        if auto_sync:
+            # 使用异步方法进行同步
+            asyncio.create_task(self._sync_knowledge_base())
+        
         print("业务知识库管理器初始化完成")
+
+    async def _sync_knowledge_base(self):
+        """同步知识库，确保索引已经建立"""
+        print("正在同步知识库...")
+        # 获取所有业务ID
+        business_ids = list(self.kb_manager.kb_metadata["businesses"].keys())
+        
+        # 逐个同步业务
+        success_count = 0
+        for business_id in business_ids:
+            try:
+                # 使用公开的方法进行同步，而不是尝试调用内部方法
+                # 检查业务是否存在
+                if business_id in self.kb_manager.kb_metadata["businesses"]:
+                    # 获取业务文档
+                    documents = self.kb_manager.kb_metadata["businesses"][business_id].get("documents", {})
+                    
+                    # 如果有文档，尝试重新处理一个文档来触发索引更新
+                    if documents:
+                        # 获取第一个文档ID和路径
+                        doc_id = list(documents.keys())[0]
+                        doc_info = documents[doc_id]
+                        file_path = doc_info.get("file_path")
+                        
+                        if file_path and Path(file_path).exists():
+                            # 重新添加文档，这会触发索引更新
+                            await self.kb_manager.add_documents_to_kb(
+                                business_id=business_id,
+                                file_paths=[file_path]
+                            )
+                            
+                success_count += 1
+            except Exception as e:
+                print(f"同步业务 '{business_id}' 失败: {str(e)}")
+        
+        print(f"同步完成，结果: {success_count}/{len(business_ids)} 个业务同步成功")
+        return success_count == len(business_ids)
     
     async def run_basic_test(self, business_id: str = "test_business"):
         """
@@ -425,6 +465,183 @@ class BusinessKBTester:
         
         return test_docs
 
+    async def run_cross_business_test(self, base_business_id: str = "cross_test_business"):
+        """
+        运行跨业务查询测试 - 简化版
+        
+        Args:
+            base_business_id: 基础业务ID前缀
+        """
+        print("\n=== 运行跨业务查询测试（简化版）===")
+        
+        # 设置更高的日志级别，减少输出
+        import logging
+        logging.getLogger("BusinessKB").setLevel(logging.WARNING)
+        logging.getLogger("business_relation_manager").setLevel(logging.WARNING)
+        
+        # 初始化业务ID列表
+        business_ids = []
+        
+        try:
+            # 1. 创建测试业务
+            print("\n1. 创建测试业务...")
+            business_names = ["智能底盘", "自动驾驶", "车载信息娱乐"]
+            
+            for i, name in enumerate(business_names, 1):
+                business_id = f"{base_business_id}_{i}"
+                business_ids.append(business_id)
+                
+                # 确保测试业务不存在
+                if business_id in self.kb_manager.kb_metadata["businesses"]:
+                    self.kb_manager.delete_business_kb(business_id)
+                
+                success = self.kb_manager.create_business_kb(
+                    business_id=business_id,
+                    name=name,
+                    description=f"测试业务: {name}"
+                )
+                
+                if not success:
+                    raise ValueError(f"创建业务 '{business_id}' 失败")
+            
+            print(f"✓ 创建了 {len(business_ids)} 个测试业务")
+            
+            # 2. 为每个业务添加测试文档
+            print("\n2. 添加测试文档...")
+            test_content = {
+                0: [  # 业务1: 智能底盘
+                    "智能底盘系统包括主动悬挂、电子稳定控制和自适应转向系统。",
+                    "底盘控制单元(CCU)负责协调各个子系统的工作。"
+                ],
+                1: [  # 业务2: 自动驾驶
+                    "自动驾驶系统依赖于多种传感器融合技术，包括摄像头、雷达和激光雷达。",
+                    "感知、决策和规划是自动驾驶的三个核心模块。"
+                ],
+                2: [  # 业务3: 车载信息娱乐
+                    "车载信息娱乐系统提供导航、多媒体和通信功能。",
+                    "车载操作系统需要满足实时性、安全性和可靠性要求。"
+                ]
+            }
+            
+            for i, business_id in enumerate(business_ids):
+                # 每个业务只创建一个文档
+                doc_path = self.test_docs_dir / f"{business_id}_doc.txt"
+                with open(doc_path, "w", encoding="utf-8") as f:
+                    f.write(f"# {business_names[i]}业务测试文档\n\n")
+                    f.write("所有业务都共享的智能汽车技术包括自动驾驶、车联网和电动化技术。\n\n")
+                    
+                    # 添加业务特定内容
+                    for line in test_content[i]:
+                        f.write(f"{line}\n")
+            
+                # 添加文档到业务
+                doc_ids = await self.kb_manager.add_documents_to_kb(
+                    business_id=business_id,
+                    file_paths=[str(doc_path)]
+                )
+            
+                if not doc_ids:
+                    raise ValueError(f"向业务 '{business_id}' 添加文档失败")
+            
+            print(f"✓ 为每个业务添加了测试文档")
+            
+            # 3. 建立业务关联关系
+            print("\n3. 建立业务关联关系...")
+            
+            # 确保索引已经建立完成
+            print("确保索引已经建立完成...")
+            await self._sync_knowledge_base()
+            
+            # 添加延迟，确保索引已完全建立
+            print("等待索引建立完成...")
+            await asyncio.sleep(10)
+            
+            # 建立业务1和业务2的关联
+            success = self.kb_manager.relation_manager.add_relation(
+                business_a=business_ids[0],
+                business_b=business_ids[1],
+                relation_type="related",
+                weight=0.7  # 进一步降低权重值
+            )
+            
+            if not success:
+                print(f"警告: 建立业务 '{business_ids[0]}' 和 '{business_ids[1]}' 的关联失败，但继续测试")
+            
+            # 建立业务1和业务3的关联
+            success = self.kb_manager.relation_manager.add_relation(
+                business_a=business_ids[0],
+                business_b=business_ids[2],
+                relation_type="related",
+                weight=0.7  # 进一步降低权重值
+            )
+            
+            if not success:
+                print(f"警告: 建立业务 '{business_ids[0]}' 和 '{business_ids[2]}' 的关联失败，但继续测试")
+            
+            # 简化关联关系输出
+            for i, business_id in enumerate(business_ids):
+                related = self.kb_manager.relation_manager.get_related_businesses(business_id)
+                print(f"✓ {business_names[i]}业务关联: {', '.join(related) if related else '无'}")
+            
+            # 4. 测试跨业务查询
+            print("\n4. 测试跨业务查询...")
+            
+            # 测试查询
+            test_queries = [
+                "智能底盘的主要功能是什么?",  # 业务1相关
+                "自动驾驶系统如何处理传感器数据?",  # 业务2相关
+                "车载信息娱乐系统有哪些功能?"  # 业务3相关
+            ]
+            
+            # 主业务ID (业务1)
+            main_business_id = business_ids[0]
+            
+            for i, query in enumerate(test_queries):
+                print(f"\n查询 {i+1}: {query}")
+                
+                try:
+                    # 普通查询
+                    result = await self.kb_manager.query_business_kb(
+                        business_id=main_business_id,
+                        query=query
+                    )
+                    print(f"• 普通查询: {result['response'][:150]}...")
+                    
+                    # 跨业务查询
+                    result = await self.kb_manager.query_with_cross_business(
+                        business_id=main_business_id,
+                        query=query,
+                        expand_to_related=True,
+                        max_related_businesses=2,
+                        response_mode="compact"
+                    )
+                    print(f"• 跨业务查询: {result['response'][:150]}...")
+                    
+                    # 检查是否找到了额外的相关信息
+                    if "related_businesses" in result and result["related_businesses"]:
+                        print(f"  (找到相关业务: {', '.join(result['related_businesses'])})")
+                except Exception as e:
+                    print(f"查询 '{query}' 失败: {str(e)}")
+        
+        except Exception as e:
+            print(f"测试过程中发生错误: {str(e)}")
+            import traceback
+            traceback.print_exc()
+        finally:
+            # 5. 清理测试业务
+            print("\n5. 清理测试业务...")
+            for business_id in business_ids:
+                try:
+                    self.kb_manager.delete_business_kb(business_id)
+                except Exception as e:
+                    print(f"警告: 删除业务 '{business_id}' 失败: {str(e)}")
+            
+            # 恢复日志级别
+            logging.getLogger("BusinessKB").setLevel(logging.INFO)
+            logging.getLogger("business_relation_manager").setLevel(logging.INFO)
+            
+            print("\n✓ 测试完成")
+
 async def main():
     """主函数"""
     # 解析命令行参数
@@ -432,7 +649,7 @@ async def main():
     parser.add_argument("--base-dir", type=str, help="知识库基础目录")
     parser.add_argument("--milvus-uri", type=str, default="http://localhost:19530", help="Milvus服务URI")
     parser.add_argument("--no-sync", action="store_true", help="禁用自动同步")
-    parser.add_argument("--test", choices=["basic", "sync", "performance", "all"], default="basic", help="测试类型")
+    parser.add_argument("--test", choices=["basic", "sync", "performance", "cross", "all"], default="basic", help="测试类型")
     parser.add_argument("--doc-count", type=int, default=10, help="性能测试文档数量")
     args = parser.parse_args()
     
@@ -453,6 +670,9 @@ async def main():
     if args.test == "performance" or args.test == "all":
         await tester.run_performance_test(doc_count=args.doc_count)
     
+    if args.test == "cross" or args.test == "all":
+        await tester.run_cross_business_test()
+    
     print("\n所有测试完成")
 
 if __name__ == "__main__":
@@ -461,6 +681,28 @@ if __name__ == "__main__":
     
     # 运行主函数
     asyncio.run(main())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

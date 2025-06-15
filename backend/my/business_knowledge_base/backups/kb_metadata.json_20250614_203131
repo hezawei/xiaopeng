@@ -1,0 +1,25 @@
+{
+  "businesses": {
+    "cross_test_business_1": {
+      "name": "跨业务测试 1",
+      "description": "用于测试跨业务查询的业务 1",
+      "created_at": "2025-06-14T20:31:29.791699",
+      "updated_at": "2025-06-14T20:31:29.791699",
+      "documents": {}
+    },
+    "cross_test_business_2": {
+      "name": "跨业务测试 2",
+      "description": "用于测试跨业务查询的业务 2",
+      "created_at": "2025-06-14T20:31:29.792700",
+      "updated_at": "2025-06-14T20:31:29.792700",
+      "documents": {}
+    },
+    "cross_test_business_3": {
+      "name": "跨业务测试 3",
+      "description": "用于测试跨业务查询的业务 3",
+      "created_at": "2025-06-14T20:31:29.801617",
+      "updated_at": "2025-06-14T20:31:29.801617",
+      "documents": {}
+    }
+  }
+}

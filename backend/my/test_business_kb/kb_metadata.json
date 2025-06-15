@@ -15,22 +15,6 @@
           "file_fingerprint": "47e00447b7a031bdbfee0e559bcd0c53"
         }
       }
-    },
-    "intelligen_chassis": {
-      "name": "intelligen_chassis",
-      "description": "intelligen_chassis",
-      "created_at": "2025-06-08T15:16:53.579723",
-      "updated_at": "2025-06-08T15:17:24.613031",
-      "documents": {
-        "7b9adf48-3714-4d72-9fd4-9cc0e458a66d": {
-          "file_name": "海外三方地图分享地址到车.docx",
-          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\海外三方地图分享地址到车.docx",
-          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_business_kb\\intelligen_chassis\\documents\\7b9adf48-3714-4d72-9fd4-9cc0e458a66d_海外三方地图分享地址到车.docx",
-          "added_at": "2025-06-08T15:17:22.239231",
-          "status": "deleted",
-          "file_fingerprint": null
-        }
-      }
     }
   }
 }

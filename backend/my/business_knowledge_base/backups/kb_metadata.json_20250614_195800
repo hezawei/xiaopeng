@@ -1,0 +1,35 @@
+{
+  "businesses": {
+    "cross_test_business_3": {
+      "name": "测试业务3",
+      "description": "这是跨业务测试用的业务知识库3",
+      "created_at": "2025-06-14T19:37:32.830344",
+      "updated_at": "2025-06-14T19:58:00.094345",
+      "documents": {
+        "eb0acd41-7503-4d04-ba5d-a9669960dd04": {
+          "file_name": "cross_test_business_3_doc_0.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_0.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\eb0acd41-7503-4d04-ba5d-a9669960dd04_cross_test_business_3_doc_0.txt",
+          "added_at": "2025-06-14T19:37:36.490577",
+          "file_fingerprint": "d36fca04864eda1f2701298979f77c6d",
+          "status": "active"
+        },
+        "e8bd23a0-6d7b-4d80-80f6-2614b2a270ad": {
+          "file_name": "cross_test_business_3_doc_1.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_1.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\e8bd23a0-6d7b-4d80-80f6-2614b2a270ad_cross_test_business_3_doc_1.txt",
+          "added_at": "2025-06-14T19:37:36.493743",
+          "file_fingerprint": "19520daf2b14b8ddb71d4a0c504bb241",
+          "status": "active"
+        },
+        "9b5d4c97-ee7d-4741-beb0-66f210f3446d": {
+          "file_name": "cross_test_business_3_doc_2.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_2.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\9b5d4c97-ee7d-4741-beb0-66f210f3446d_cross_test_business_3_doc_2.txt",
+          "added_at": "2025-06-14T19:37:36.496895",
+          "file_fingerprint": "0a82b782bc1612dab1e617471a6c0495",
+          "status": "active"
+        },
+        "569def05-e6af-45d8-963a-c5c919faba7a": {
+          "file_name": "cross_test_business_3_doc_0.txt",
+          "original_path": 

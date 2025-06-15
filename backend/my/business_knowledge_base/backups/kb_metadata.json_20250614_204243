@@ -1,0 +1,20 @@
+{
+  "businesses": {
+    "cross_test_business_3": {
+      "name": "车载信息娱乐",
+      "description": "测试业务: 车载信息娱乐",
+      "created_at": "2025-06-14T20:42:38.878033",
+      "updated_at": "2025-06-14T20:42:43.427208",
+      "documents": {
+        "69ffcb1c-8403-469c-8a78-689f457d6a07": {
+          "file_name": "cross_test_business_3_doc.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\69ffcb1c-8403-469c-8a78-689f457d6a07_cross_test_business_3_doc.txt",
+          "added_at": "2025-06-14T20:42:42.025202",
+          "file_fingerprint": "4f0c52dc6726809f902adad309fce3b3",
+          "status": "active"
+        }
+      }
+    }
+  }
+}

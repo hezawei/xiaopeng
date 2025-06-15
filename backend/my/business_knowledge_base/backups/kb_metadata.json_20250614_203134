@@ -1,0 +1,36 @@
+{
+  "businesses": {
+    "cross_test_business_3": {
+      "name": "跨业务测试 3",
+      "description": "用于测试跨业务查询的业务 3",
+      "created_at": "2025-06-14T20:31:29.801617",
+      "updated_at": "2025-06-14T20:31:34.492093",
+      "documents": {
+        "143cf037-5d05-49f7-ae22-2940b58322c5": {
+          "file_name": "cross_test_business_3_doc_0.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_0.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\143cf037-5d05-49f7-ae22-2940b58322c5_cross_test_business_3_doc_0.txt",
+          "added_at": "2025-06-14T20:31:32.842164",
+          "file_fingerprint": "d36fca04864eda1f2701298979f77c6d",
+          "status": "active"
+        },
+        "cb2674e0-494e-4a06-a5bc-5149d4bce81c": {
+          "file_name": "cross_test_business_3_doc_1.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_1.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\cb2674e0-494e-4a06-a5bc-5149d4bce81c_cross_test_business_3_doc_1.txt",
+          "added_at": "2025-06-14T20:31:32.845841",
+          "file_fingerprint": "be09d68c7d04d4dbc41bceea0355095d",
+          "status": "active"
+        },
+        "7de40176-d70c-4cae-ac9f-4932d0ce5563": {
+          "file_name": "cross_test_business_3_doc_2.txt",
+          "original_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\test_docs\\cross_test_business_3_doc_2.txt",
+          "kb_path": "D:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\cross_test_business_3\\documents\\7de40176-d70c-4cae-ac9f-4932d0ce5563_cross_test_business_3_doc_2.txt",
+          "added_at": "2025-06-14T20:31:32.848883",
+          "file_fingerprint": "8c2b17c970415b1b44dcbcc083c82b67",
+          "status": "active"
+        }
+      }
+    }
+  }
+}

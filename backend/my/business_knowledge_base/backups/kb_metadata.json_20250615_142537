@@ -1,0 +1,25 @@
+{
+  "businesses": {
+    "intelligent_chassis": {
+      "name": "智能底盘",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.344772",
+      "updated_at": "2025-06-15T14:25:37.344772",
+      "documents": {}
+    },
+    "autonomous_driving": {
+      "name": "自动驾驶",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.345772",
+      "updated_at": "2025-06-15T14:25:37.345772",
+      "documents": {}
+    },
+    "sensor_technology": {
+      "name": "传感器技术",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.353771",
+      "updated_at": "2025-06-15T14:25:37.353771",
+      "documents": {}
+    }
+  }
+}

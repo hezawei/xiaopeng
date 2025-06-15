@@ -1,0 +1,51 @@
+{
+  "businesses": {
+    "intelligent_chassis": {
+      "name": "智能底盘",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.344772",
+      "updated_at": "2025-06-15T14:25:37.593586",
+      "documents": {
+        "53ab92ba-720d-4951-bbc7-962cdcb9a259": {
+          "file_name": "intelligent_chassis_overview.txt",
+          "original_path": "sample_docs\\intelligent_chassis_overview.txt",
+          "kb_path": "d:\\Pycharm\\PycharmProjects\\ai_testing_system\\xiaopeng\\backend\\my\\business_knowledge_base\\intelligent_chassis\\documents\\intelligent_chassis_overview.txt",
+          "status": "active",
+          "file_fingerprint": "1c130df042494ca10d455e60ddaf2858",
+          "added_at": "2025-06-15T14:25:37.593586",
+          "entities": [
+            "智能底盘是现",
+            "机械电子一体",
+            "概述",
+            "效率",
+            "传感器融合",
+            "种路况下的稳",
+            "系统",
+            "化设计等",
+            "进技术",
+            "代汽车的重要",
+            "根据路况自动",
+            "向控制",
+            "集成了多种先",
+            "自适应阻尼控",
+            "控性"
+          ]
+        }
+      }
+    },
+    "autonomous_driving": {
+      "name": "自动驾驶",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.345772",
+      "updated_at": "2025-06-15T14:25:37.345772",
+      "documents": {}
+    },
+    "sensor_technology": {
+      "name": "传感器技术",
+      "description": "",
+      "created_at": "2025-06-15T14:25:37.353771",
+      "updated_at": "2025-06-15T14:25:37.353771",
+      "documents": {}
+    }
+  }
+}
